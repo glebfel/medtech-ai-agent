@@ -2,15 +2,20 @@ import uuid
 
 import streamlit as st
 
+from src.schemas.enums import LLMProvider
 from src.settings import Settings
 from src.ui.constants import EXAMPLES, TOOL_LABELS
 
 
-def render_sidebar(settings: Settings) -> float:
+def render_sidebar(settings: Settings) -> tuple[LLMProvider, float]:
     with st.sidebar:
         st.header("Settings")
 
-        st.text_input("LLM Provider", value=settings.llm_provider.value, disabled=True)
+        providers = [p.value for p in LLMProvider]
+        default_idx = providers.index(settings.llm_provider.value)
+        selected_provider = st.selectbox("LLM Provider", providers, index=default_idx)
+        provider = LLMProvider(selected_provider)
+
         temperature = st.slider("Temperature", 0.0, 1.0, 0.1, 0.05)
 
         if st.button("New conversation", use_container_width=True):
@@ -33,4 +38,4 @@ def render_sidebar(settings: Settings) -> float:
                 st.session_state.pending_example = ex
                 st.rerun()
 
-    return temperature
+    return provider, temperature

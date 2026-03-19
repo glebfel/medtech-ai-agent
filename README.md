@@ -6,7 +6,7 @@ LLM-агент для медицинских работников на базе 
 ## Возможности
 
 - **6 инструментов:** проверка взаимодействий лекарств, расчёт ИМТ, поиск МКБ-10, расчёт дозировок, словарь мед. терминов, веб-поиск
-- **Мульти-LLM:** OpenAI, GigaChat, Ollama (локальные модели)
+- **Мульти-LLM:** OpenAI, Anthropic (Claude), GigaChat, Ollama (локальные модели)
 - **Персистентная память:** состояние диалога хранится в PostgreSQL через LangGraph checkpointer
 - **Веб-интерфейс:** Streamlit с sidebar настройками, gauge-диаграмма ИМТ, таблица результатов МКБ-10, статистика вызовов
 - **Справочные данные в PostgreSQL:** взаимодействия лекарств, коды МКБ-10, мед. термины, дозировки — сидируются из JSON при первом запуске
@@ -63,6 +63,7 @@ cp .env.example .env
 | Переменная | Когда нужна |
 |---|---|
 | `OPENAI_API_KEY` | `LLM_PROVIDER=openai` |
+| `ANTHROPIC_API_KEY` | `LLM_PROVIDER=anthropic` |
 | `GIGACHAT_CREDENTIALS` | `LLM_PROVIDER=gigachat` |
 | Запущенный Ollama | `LLM_PROVIDER=ollama` |
 
@@ -88,9 +89,11 @@ docker compose up --build
 
 | Переменная | По умолчанию | Описание |
 |---|---|---|
-| `LLM_PROVIDER` | `openai` | LLM-бэкенд: `openai`, `gigachat`, `ollama` |
+| `LLM_PROVIDER` | `openai` | LLM-бэкенд: `openai`, `anthropic`, `gigachat`, `ollama` |
 | `OPENAI_API_KEY` | | Ключ OpenAI API |
 | `OPENAI_MODEL` | `gpt-4o-mini` | Модель OpenAI |
+| `ANTHROPIC_API_KEY` | | Ключ Anthropic API |
+| `ANTHROPIC_MODEL` | `claude-sonnet-4-6-20250620` | Модель Claude |
 | `GIGACHAT_CREDENTIALS` | | Креды GigaChat |
 | `GIGACHAT_VERIFY_SSL` | `false` | Проверка SSL для GigaChat |
 | `OLLAMA_MODEL` | `llama3.1` | Модель Ollama |

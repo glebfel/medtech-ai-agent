@@ -1,3 +1,4 @@
+from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_gigachat import GigaChat
 from langchain_ollama import ChatOllama
@@ -17,9 +18,16 @@ def create_llm(settings: Settings, temperature: float = 0.1) -> BaseChatModel:
             temperature=temperature,
         )
 
+    if provider == LLMProvider.ANTHROPIC:
+        return ChatAnthropic(
+            model=settings.anthropic_model,
+            api_key=settings.anthropic_api_key,
+            temperature=temperature,
+        )
+
     if provider == LLMProvider.GIGACHAT:
         return GigaChat(
-            credentials=settings.gigachat_credentials,
+            credentials=settings.gigachat_credentials.get_secret_value(),
             scope=settings.gigachat_scope,
             model="GigaChat",
             verify_ssl_certs=settings.gigachat_verify_ssl,

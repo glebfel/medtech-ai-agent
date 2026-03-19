@@ -11,6 +11,7 @@ class LogLevel(StrEnum):
 
 class LLMProvider(StrEnum):
     OPENAI = "openai"
+    ANTHROPIC = "anthropic"
     GIGACHAT = "gigachat"
     OLLAMA = "ollama"
 

@@ -32,9 +32,9 @@ def _init_infrastructure():
 
     setup_logging(settings.log_level)
 
-    if settings.langchain_tracing_v2 and settings.langchain_api_key:
+    if settings.langchain_tracing_v2 and settings.langchain_api_key.get_secret_value():
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
-        os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key
+        os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key.get_secret_value()
         os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
         logger.info("LangSmith tracing enabled (project=%s)", settings.langchain_project)
 
@@ -67,14 +67,18 @@ def main() -> None:
     if "tool_usage" not in st.session_state:
         st.session_state.tool_usage = {}
 
-    temperature = render_sidebar(settings)
+    provider, temperature = render_sidebar(settings)
 
-    if (
+    needs_rebuild = (
         "agent" not in st.session_state
         or st.session_state.get("_temperature") != temperature
-    ):
-        st.session_state.agent = build_agent(settings, checkpointer, temperature)
+        or st.session_state.get("_provider") != provider
+    )
+    if needs_rebuild:
+        settings_override = settings.model_copy(update={"llm_provider": provider})
+        st.session_state.agent = build_agent(settings_override, checkpointer, temperature)
         st.session_state._temperature = temperature
+        st.session_state._provider = provider
 
     agent = st.session_state.agent
 
