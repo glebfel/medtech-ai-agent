@@ -42,14 +42,16 @@ class DosageResult(BaseModel):
     note: str
 
     def format(self, medication: str, weight_kg: float, age_years: int) -> str:
-        return "\n".join([
-            f"Dosage calculation for {medication.upper()}:",
-            f"  Patient: {weight_kg} kg, {age_years} years old",
-            f"  Form: {self.form}",
-            f"  Calculated daily dose: {self.daily_dose_min_mg:.0f} - {self.daily_dose_max_mg:.0f} mg/day",
-            f"  Maximum daily dose: {self.max_daily_mg:.0f} mg/day",
-            f"  Frequency: {self.frequency}",
-            f"\n  Note: {self.note}",
-            "\n  WARNING: This is a calculated estimate. Always verify with clinical "
-            "guidelines and adjust for patient-specific factors.",
-        ])
+        return "\n".join(
+            [
+                f"Dosage calculation for {medication.upper()}:",
+                f"  Patient: {weight_kg} kg, {age_years} years old",
+                f"  Form: {self.form}",
+                f"  Calculated daily dose: {self.daily_dose_min_mg:.0f} - {self.daily_dose_max_mg:.0f} mg/day",
+                f"  Maximum daily dose: {self.max_daily_mg:.0f} mg/day",
+                f"  Frequency: {self.frequency}",
+                f"\n  Note: {self.note}",
+                "\n  WARNING: This is a calculated estimate. Always verify with clinical "
+                "guidelines and adjust for patient-specific factors.",
+            ]
+        )

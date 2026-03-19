@@ -27,14 +27,21 @@ def init_engine(
     global _engine, _session_factory
 
     url = _to_sqlalchemy_url(database_url)
-    _engine = create_engine(url, pool_size=pool_size, max_overflow=max_overflow, pool_pre_ping=True)
+    _engine = create_engine(
+        url, pool_size=pool_size, max_overflow=max_overflow, pool_pre_ping=True
+    )
     _session_factory = sessionmaker(bind=_engine, expire_on_commit=False)
 
     with _engine.connect() as conn:
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         conn.commit()
 
-    logger.info("Database engine initialized (host=%s, db=%s)", _engine.url.host, _engine.url.database)
+    logger.info(
+        "Database engine initialized (host=%s, db=%s)",
+        _engine.url.host,
+        _engine.url.database,
+    )
 
 
 @contextmanager

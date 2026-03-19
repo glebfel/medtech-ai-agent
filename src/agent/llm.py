@@ -8,12 +8,12 @@ from src.schemas.enums import LLMProvider
 from src.settings import Settings
 from src.ui.constants import PROVIDER_MODELS
 
-_DEFAULT_MODELS: dict[str, str] = {
-    k: v[0] for k, v in PROVIDER_MODELS.items()
-}
+_DEFAULT_MODELS: dict[str, str] = {k: v[0] for k, v in PROVIDER_MODELS.items()}
 
 
-def create_llm(settings: Settings, temperature: float = 0.1, model_name: str = "") -> BaseChatModel:
+def create_llm(
+    settings: Settings, temperature: float = 0.1, model_name: str = ""
+) -> BaseChatModel:
     provider = settings.default_llm_provider
 
     if provider == LLMProvider.OPENAI:

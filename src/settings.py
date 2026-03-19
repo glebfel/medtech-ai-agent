@@ -1,3 +1,4 @@
+import base64
 from functools import lru_cache
 
 from pydantic import Field, SecretStr, computed_field, field_validator
@@ -35,14 +36,21 @@ class Settings(BaseSettings):
         secret = self.gigachat_client_secret.get_secret_value()
         if not cid or not secret:
             return ""
-        import base64
         return base64.b64encode(f"{cid}:{secret}".encode()).decode()
 
     # Ollama
     ollama_base_url: str = "http://localhost:11434"
 
+    # Embeddings
+    embedding_model: str = "nomic-embed-text"
+    embedding_dim: int = 768
+    embedding_pull_timeout: int = 300
+
     # Health check
     health_check_timeout: int = 5
+
+    # User identification
+    user_storage_key: str = "medassist_user_id"
 
     # Input limits
     max_input_length: int = 5000
@@ -81,7 +89,6 @@ class Settings(BaseSettings):
     @classmethod
     def _normalize_provider(cls, v: str) -> str:
         return v.strip().lower()
-
 
 
 @lru_cache

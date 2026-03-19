@@ -1,3 +1,6 @@
+from typing import Optional
+
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -13,3 +16,4 @@ class DrugInteractionEntity(Base):
     severity: Mapped[str] = mapped_column(String(50), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     recommendation: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding: Mapped[Optional[list]] = mapped_column(Vector(768), nullable=True)

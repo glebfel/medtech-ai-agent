@@ -9,6 +9,7 @@ from src.services.chat_session import ChatSessionService
 from src.services.infrastructure import init_infrastructure
 from src.ui.chat import process_response, render_chat_history, render_title_editor
 from src.ui.sidebar import render_sidebar
+from src.ui.user_id import get_user_id
 
 logger = get_logger("main")
 
@@ -21,7 +22,8 @@ def _init():
 def main() -> None:
     st.set_page_config(page_title="MedAssistAI", page_icon="\U0001f3e5", layout="wide")
 
-    checkpointer, settings = _init()
+    checkpointer, store, settings = _init()
+    get_user_id()
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -32,10 +34,12 @@ def main() -> None:
 
     if st.session_state.pop("_load_from_history", False):
         st.session_state.messages = ChatSessionService.restore_messages(
-            checkpointer, thread_id=st.session_state.thread_id,
+            checkpointer,
+            thread_id=st.session_state.thread_id,
         )
 
     provider, model_name, temperature = render_sidebar(settings)
+    active_settings = settings.model_copy(update={"default_llm_provider": provider})
 
     needs_rebuild = (
         "agent" not in st.session_state
@@ -44,14 +48,22 @@ def main() -> None:
         or st.session_state.get("_model") != model_name
     )
     if needs_rebuild:
-        settings_override = settings.model_copy(update={"default_llm_provider": provider})
         st.session_state.agent = build_agent(
-            settings_override, checkpointer=checkpointer, temperature=temperature, model_name=model_name,
+            active_settings,
+            checkpointer=checkpointer,
+            store=store,
+            temperature=temperature,
+            model_name=model_name,
         )
         st.session_state._temperature = temperature
         st.session_state._provider = provider
         st.session_state._model = model_name
-        logger.info("Agent rebuilt: provider=%s, model=%s, temperature=%s", provider, model_name, temperature)
+        logger.info(
+            "Agent rebuilt: provider=%s, model=%s, temperature=%s",
+            provider,
+            model_name,
+            temperature,
+        )
 
     agent = st.session_state.agent
 
@@ -78,13 +90,22 @@ def main() -> None:
             st.rerun()
 
         thread_id = st.session_state.thread_id
-        logger.info("User message: thread_id=%s, provider=%s, model=%s, length=%d", thread_id, provider, model_name, len(prompt))
+        logger.info(
+            "User message: thread_id=%s, provider=%s, model=%s, length=%d",
+            thread_id,
+            provider,
+            model_name,
+            len(prompt),
+        )
 
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        config = {"configurable": {"thread_id": thread_id}}
+        user_id = st.session_state.get("_user_id", "default")
+        config = {
+            "configurable": {"thread_id": thread_id, "langgraph_user_id": user_id}
+        }
 
         with st.chat_message("assistant"):
             try:
@@ -98,10 +119,17 @@ def main() -> None:
                 assistant_msg = process_response(result)
                 logger.info(
                     "Agent response: thread_id=%s, duration=%.2fs, tools=%s",
-                    thread_id, duration, assistant_msg.get("tools_used", []),
+                    thread_id,
+                    duration,
+                    assistant_msg.get("tools_used", []),
                 )
             except Exception:
-                logger.exception("Agent invocation failed: thread_id=%s, provider=%s, model=%s", thread_id, provider, model_name)
+                logger.exception(
+                    "Agent invocation failed: thread_id=%s, provider=%s, model=%s",
+                    thread_id,
+                    provider,
+                    model_name,
+                )
                 err_msg = "An error occurred. Please try again or switch the model."
                 st.error(err_msg)
                 assistant_msg = {"role": "assistant", "content": err_msg}

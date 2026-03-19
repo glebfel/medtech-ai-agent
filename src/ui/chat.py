@@ -37,7 +37,11 @@ def _render_assistant_message(msg: dict, idx: int = 0) -> None:
     if msg.get("bmi_value"):
         render_bmi_gauge(msg["bmi_value"], key=f"bmi_history_{idx}")
     if msg.get("icd10_data"):
-        st.dataframe(pd.DataFrame(msg["icd10_data"]), use_container_width=True, key=f"icd10_history_{idx}")
+        st.dataframe(
+            pd.DataFrame(msg["icd10_data"]),
+            use_container_width=True,
+            key=f"icd10_history_{idx}",
+        )
     if msg.get("tools_used"):
         labels = [TOOL_LABELS.get(t, t) for t in msg["tools_used"]]
         st.caption(f"Instruments: {', '.join(labels)}")
@@ -67,7 +71,11 @@ def process_response(result: dict) -> dict:
         elif tool_name == "icd10_search":
             icd10_data = parse_icd10(msg.content)
             if icd10_data:
-                st.dataframe(pd.DataFrame(icd10_data), use_container_width=True, key="icd10_current")
+                st.dataframe(
+                    pd.DataFrame(icd10_data),
+                    use_container_width=True,
+                    key="icd10_current",
+                )
 
     if tools_used:
         labels = [TOOL_LABELS.get(t, t) for t in tools_used]

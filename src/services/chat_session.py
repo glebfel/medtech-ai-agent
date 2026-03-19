@@ -64,7 +64,9 @@ class ChatSessionService:
                 if msg.type == "tool":
                     continue
                 role = "assistant" if msg.type == "ai" else "user"
-                content = msg.content if isinstance(msg.content, str) else str(msg.content)
+                content = (
+                    msg.content if isinstance(msg.content, str) else str(msg.content)
+                )
                 if content:
                     restored.append({"role": role, "content": content})
             return restored

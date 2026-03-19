@@ -9,13 +9,13 @@ def parse_bmi(text: str) -> float | None:
 def parse_icd10(text: str) -> list[dict]:
     results = []
     for line in text.split("\n"):
-        m = re.match(
-            r"\s+([A-Z]\d[\w.]*): (.+?)(?:\s*\(confidence: (\w+)\))?$", line
-        )
+        m = re.match(r"\s+([A-Z]\d[\w.]*): (.+?)(?:\s*\(confidence: (\w+)\))?$", line)
         if m:
-            results.append({
-                "Code": m.group(1),
-                "Description": m.group(2).strip(),
-                "Confidence": m.group(3) or "",
-            })
+            results.append(
+                {
+                    "Code": m.group(1),
+                    "Description": m.group(2).strip(),
+                    "Confidence": m.group(3) or "",
+                }
+            )
     return results

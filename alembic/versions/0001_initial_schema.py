@@ -17,6 +17,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     op.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
 
     op.create_table(
         "drug_interactions",
@@ -34,26 +35,12 @@ def upgrade() -> None:
         sa.Column("code", sa.String(20), unique=True, nullable=False),
         sa.Column("description", sa.Text, nullable=False),
     )
-    op.create_index(
-        "idx_icd10_description_trgm",
-        "icd10_codes",
-        ["description"],
-        postgresql_using="gin",
-        postgresql_ops={"description": "gin_trgm_ops"},
-    )
 
     op.create_table(
         "med_terms",
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column("term", sa.String(100), unique=True, nullable=False),
         sa.Column("explanation", sa.Text, nullable=False),
-    )
-    op.create_index(
-        "idx_med_term_trgm",
-        "med_terms",
-        ["term"],
-        postgresql_using="gin",
-        postgresql_ops={"term": "gin_trgm_ops"},
     )
 
     op.create_table(
@@ -87,6 +74,11 @@ def upgrade() -> None:
         postgresql_ops={"title": "gin_trgm_ops"},
     )
 
+    # pgvector embedding columns for semantic search
+    op.execute("ALTER TABLE med_terms ADD COLUMN embedding vector(768)")
+    op.execute("ALTER TABLE icd10_codes ADD COLUMN embedding vector(768)")
+    op.execute("ALTER TABLE drug_interactions ADD COLUMN embedding vector(768)")
+
 
 def downgrade() -> None:
     op.drop_table("chat_sessions")
@@ -94,4 +86,5 @@ def downgrade() -> None:
     op.drop_table("med_terms")
     op.drop_table("icd10_codes")
     op.drop_table("drug_interactions")
+    op.execute("DROP EXTENSION IF EXISTS vector")
     op.execute("DROP EXTENSION IF EXISTS pg_trgm")

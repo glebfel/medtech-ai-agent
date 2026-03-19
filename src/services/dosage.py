@@ -5,9 +5,7 @@ from src.schemas.dosage import DosageInfo, DosageResult
 
 class DosageService:
     @staticmethod
-    def calculate(
-        medication: str, weight_kg: float, age_years: int
-    ) -> DosageResult:
+    def calculate(medication: str, weight_kg: float, age_years: int) -> DosageResult:
         """Calculate dosage for a medication from the database.
 
         Raises:
@@ -24,9 +22,7 @@ class DosageService:
 
             if entity is None:
                 available = ", ".join(repo.list_all_names())
-                raise ValueError(
-                    f"'{medication}' not found. Available: {available}"
-                )
+                raise ValueError(f"'{medication}' not found. Available: {available}")
 
             if age_years < entity.min_age:
                 raise ValueError(

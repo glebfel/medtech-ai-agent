@@ -16,7 +16,7 @@ from src.agent.health import (
 )
 from src.schemas.enums import LLMProvider
 from src.services.chat_session import ChatSessionService
-from src.settings import Settings
+from src.settings import Settings, get_settings
 from src.ui.constants import EXAMPLES, OLLAMA_MODEL_INFO, PROVIDER_MODELS, TOOL_LABELS
 
 
@@ -59,7 +59,12 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
         creds = settings.gigachat_credentials
         if not creds:
             return False, "Client ID / Secret не заданы"
-        return check_gigachat(creds, scope=settings.gigachat_scope, verify_ssl=settings.gigachat_verify_ssl, timeout=timeout)
+        return check_gigachat(
+            creds,
+            scope=settings.gigachat_scope,
+            verify_ssl=settings.gigachat_verify_ssl,
+            timeout=timeout,
+        )
 
     if provider == LLMProvider.OLLAMA:
         return check_ollama(settings.ollama_base_url, timeout=timeout)
@@ -67,16 +72,22 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
     return False, "Unknown provider"
 
 
-def _get_provider_models(settings: Settings, selected_provider: LLMProvider, available: bool) -> list[str]:
+def _get_provider_models(
+    settings: Settings, selected_provider: LLMProvider, available: bool
+) -> list[str]:
     fallback = PROVIDER_MODELS.get(selected_provider.value, [])
     if not available:
         return fallback
 
     timeout = settings.health_check_timeout
     if selected_provider == LLMProvider.OPENAI:
-        models = list_openai_models(settings.openai_api_key.get_secret_value(), timeout=timeout)
+        models = list_openai_models(
+            settings.openai_api_key.get_secret_value(), timeout=timeout
+        )
     elif selected_provider == LLMProvider.ANTHROPIC:
-        models = list_anthropic_models(settings.anthropic_api_key.get_secret_value(), timeout=timeout)
+        models = list_anthropic_models(
+            settings.anthropic_api_key.get_secret_value(), timeout=timeout
+        )
     elif selected_provider == LLMProvider.GIGACHAT:
         models = list_gigachat_models(
             settings.gigachat_credentials,
@@ -101,7 +112,11 @@ def _render_ollama_model_selector(base_url: str) -> str:
             compatible_names,
             index=0,
             format_func=lambda n: next(
-                (f"{m['name']} ({m['params']}, {m['size_gb']} GB)" for m in compatible if m["name"] == n),
+                (
+                    f"{m['name']} ({m['params']}, {m['size_gb']} GB)"
+                    for m in compatible
+                    if m["name"] == n
+                ),
                 n,
             ),
         )
@@ -110,14 +125,18 @@ def _render_ollama_model_selector(base_url: str) -> str:
         model_name = ""
 
     all_installed_names = [m["name"] for m in installed]
-    available_to_pull = [m for m in PROVIDER_MODELS["ollama"] if m not in all_installed_names]
+    available_to_pull = [
+        m for m in PROVIDER_MODELS["ollama"] if m not in all_installed_names
+    ]
     with st.expander("Pull new model"):
         if available_to_pull:
             selected = st.selectbox(
                 "Select model",
                 available_to_pull,
                 key="_ollama_pull_select",
-                format_func=lambda m: f"{m} ({OLLAMA_MODEL_INFO[m]})" if m in OLLAMA_MODEL_INFO else m,
+                format_func=lambda m: f"{m} ({OLLAMA_MODEL_INFO[m]})"
+                if m in OLLAMA_MODEL_INFO
+                else m,
             )
             if st.button("Pull", key="_ollama_pull_btn", use_container_width=True):
                 with st.spinner(f"Pulling {selected}..."):
@@ -158,15 +177,20 @@ def _rename_dialog(thread_id: str, title: str) -> None:
         if st.button("Cancel", use_container_width=True):
             st.rerun()
     with col_save:
-        if st.button("Save", type="primary", use_container_width=True) and new_title.strip():
+        if (
+            st.button("Save", type="primary", use_container_width=True)
+            and new_title.strip()
+        ):
             ChatSessionService.rename(thread_id=thread_id, title=new_title.strip())
-            if st.session_state.get("_current_title") and st.session_state.get("thread_id") == thread_id:
+            if (
+                st.session_state.get("_current_title")
+                and st.session_state.get("thread_id") == thread_id
+            ):
                 st.session_state._current_title = new_title.strip()
             st.rerun()
 
 
 def _render_chat_history_section() -> None:
-    from src.settings import get_settings
     limit = get_settings().max_visible_chats
 
     total = ChatSessionService.count()
@@ -196,9 +220,13 @@ def _render_chat_history_section() -> None:
                 st.rerun()
         with col_menu:
             with st.popover("\u22ee", use_container_width=True):
-                if st.button("\u270f\ufe0f Rename", key=f"ren_{tid}", use_container_width=True):
+                if st.button(
+                    "\u270f\ufe0f Rename", key=f"ren_{tid}", use_container_width=True
+                ):
                     _rename_dialog(thread_id=tid, title=s["title"])
-                if st.button("\U0001f5d1 Delete", key=f"del_{tid}", use_container_width=True):
+                if st.button(
+                    "\U0001f5d1 Delete", key=f"del_{tid}", use_container_width=True
+                ):
                     _confirm_delete(thread_id=tid, title=s["title"])
 
 
@@ -226,7 +254,9 @@ def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
         if selected_provider == LLMProvider.OLLAMA and ok:
             model_name = _render_ollama_model_selector(settings.ollama_base_url)
         else:
-            models = _get_provider_models(settings, selected_provider=selected_provider, available=ok)
+            models = _get_provider_models(
+                settings, selected_provider=selected_provider, available=ok
+            )
             model_name = st.selectbox("Model", models, index=0) if models else ""
 
         temperature = st.slider("Temperature", 0.0, 1.0, 0.1, 0.05)

@@ -33,7 +33,8 @@ class ChatSessionRepository:
             stmt = stmt.where(
                 or_(
                     ChatSessionEntity.title.ilike(f"%{q}%"),
-                    func.word_similarity(func.lower(q), func.lower(title_varchar)) > 0.3,
+                    func.word_similarity(func.lower(q), func.lower(title_varchar))
+                    > 0.3,
                 )
             )
         stmt = stmt.order_by(ChatSessionEntity.updated_at.desc()).limit(limit)

@@ -16,7 +16,9 @@ def dosage_calculator(medication: str, weight_kg: float, age_years: int) -> str:
         Recommended dosage range, frequency, and age-specific warnings.
     """
     try:
-        result = DosageService.calculate(medication, weight_kg=weight_kg, age_years=age_years)
+        result = DosageService.calculate(
+            medication, weight_kg=weight_kg, age_years=age_years
+        )
         return result.format(medication, weight_kg=weight_kg, age_years=age_years)
     except ValueError as e:
         return f"Error: {e}"

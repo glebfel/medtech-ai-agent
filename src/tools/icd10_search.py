@@ -20,6 +20,8 @@ def icd10_search(query: str) -> str:
 
     lines = [f"ICD-10 search results for '{query}':\n"]
     lines.extend(r.format() for r in results)
-    lines.append("\nNote: Always verify codes against the official ICD-10-CM reference.")
+    lines.append(
+        "\nNote: Always verify codes against the official ICD-10-CM reference."
+    )
 
     return "\n".join(lines)

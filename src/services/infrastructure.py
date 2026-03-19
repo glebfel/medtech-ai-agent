@@ -1,8 +1,11 @@
 import os
 
+import psycopg
 from alembic import command
 from alembic.config import Config
 from dotenv import load_dotenv
+from langgraph.store.postgres import PostgresStore
+from ollama import Client as OllamaClient
 
 from src.agent.memory import create_checkpointer
 from src.db import get_session, init_engine
@@ -25,7 +28,23 @@ def _configure_langsmith(settings: Settings) -> None:
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
         os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key.get_secret_value()
         os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
-        logger.info("LangSmith tracing enabled (project=%s)", settings.langchain_project)
+        logger.info(
+            "LangSmith tracing enabled (project=%s)", settings.langchain_project
+        )
+
+
+def _ensure_embedding_model(settings: Settings) -> None:
+    try:
+        client = OllamaClient(
+            host=settings.ollama_base_url, timeout=settings.embedding_pull_timeout
+        )
+        models = [m.model.split(":")[0] for m in client.list().models]
+        if settings.embedding_model not in models:
+            logger.info("Pulling embedding model %s...", settings.embedding_model)
+            client.pull(settings.embedding_model)
+            logger.info("Embedding model %s ready", settings.embedding_model)
+    except Exception as e:
+        logger.warning("Could not ensure embedding model: %s", e)
 
 
 def init_infrastructure():
@@ -41,10 +60,19 @@ def init_infrastructure():
         pool_size=settings.db_pool_size,
         max_overflow=settings.db_max_overflow,
     )
+    _ensure_embedding_model(settings)
+
     with get_session() as session:
         seed_if_empty(session, data_dir=settings.data_dir)
 
     checkpointer = create_checkpointer(settings.database_url)
 
-    logger.info("Infrastructure initialized, LLM provider=%s", settings.default_llm_provider.value)
-    return checkpointer, settings
+    store_conn = psycopg.connect(settings.database_url, autocommit=True)
+    store = PostgresStore(store_conn)
+    store.setup()
+
+    logger.info(
+        "Infrastructure initialized, LLM provider=%s",
+        settings.default_llm_provider.value,
+    )
+    return checkpointer, store, settings

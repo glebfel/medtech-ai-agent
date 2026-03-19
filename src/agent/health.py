@@ -32,7 +32,9 @@ def check_anthropic(api_key: str, timeout: int = 5) -> tuple[bool, str]:
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def check_gigachat(credentials: str, scope: str, verify_ssl: bool, timeout: int = 5) -> tuple[bool, str]:
+def check_gigachat(
+    credentials: str, scope: str, verify_ssl: bool, timeout: int = 5
+) -> tuple[bool, str]:
     try:
         client = GigaChat(
             credentials=credentials,
@@ -71,12 +73,14 @@ def list_ollama_models(base_url: str, timeout: int = 5) -> list[dict]:
                 supports_tools = "tools" in template.lower()
             except Exception:
                 supports_tools = False
-            results.append({
-                "name": m.model.split(":")[0],
-                "size_gb": round(m.size / 1_073_741_824, 1),
-                "params": m.details.parameter_size if m.details else "",
-                "tools": supports_tools,
-            })
+            results.append(
+                {
+                    "name": m.model.split(":")[0],
+                    "size_gb": round(m.size / 1_073_741_824, 1),
+                    "params": m.details.parameter_size if m.details else "",
+                    "tools": supports_tools,
+                }
+            )
         return results
     except Exception:
         return []
@@ -87,12 +91,24 @@ def list_openai_models(api_key: str, timeout: int = 5) -> list[str]:
     try:
         client = OpenAI(api_key=api_key, timeout=timeout)
         models = client.models.list()
-        excluded = {"instruct", "realtime", "codex", "audio", "search", "embed", "image", "nano"}
-        return sorted([
-            m.id for m in models
-            if m.id.startswith("gpt-")
-            and not any(ex in m.id for ex in excluded)
-        ], reverse=True)
+        excluded = {
+            "instruct",
+            "realtime",
+            "codex",
+            "audio",
+            "search",
+            "embed",
+            "image",
+            "nano",
+        }
+        return sorted(
+            [
+                m.id
+                for m in models
+                if m.id.startswith("gpt-") and not any(ex in m.id for ex in excluded)
+            ],
+            reverse=True,
+        )
     except Exception:
         return []
 
@@ -108,7 +124,9 @@ def list_anthropic_models(api_key: str, timeout: int = 5) -> list[str]:
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def list_gigachat_models(credentials: str, scope: str, verify_ssl: bool, timeout: int = 5) -> list[str]:
+def list_gigachat_models(
+    credentials: str, scope: str, verify_ssl: bool, timeout: int = 5
+) -> list[str]:
     try:
         client = GigaChat(
             credentials=credentials,

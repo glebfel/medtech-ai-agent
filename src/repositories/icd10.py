@@ -1,28 +1,30 @@
-from sqlalchemy import text
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from src.models.icd10 import ICD10CodeEntity
 
 
 class ICD10Repository:
     def __init__(self, session: Session):
         self._session = session
 
-    def search_by_description(self, query: str, limit: int = 5) -> list[dict]:
-        """Search ICD-10 codes using PostgreSQL trigram similarity + ILIKE fallback."""
-        stmt = text("""
-            SELECT code, description,
-                   similarity(LOWER(description), LOWER(:query)) AS sim
-            FROM icd10_codes
-            WHERE LOWER(description) %% LOWER(:query)
-               OR LOWER(description) LIKE LOWER(:pattern)
-            ORDER BY sim DESC
-            LIMIT :limit
-        """)
-        rows = self._session.execute(
-            stmt,
-            {"query": query, "pattern": f"%{query.strip()}%", "limit": limit},
-        ).fetchall()
-
+    def search_by_semantic(
+        self, query_embedding: list[float], limit: int = 5
+    ) -> list[dict]:
+        stmt = (
+            select(
+                ICD10CodeEntity.code,
+                ICD10CodeEntity.description,
+                ICD10CodeEntity.embedding.cosine_distance(query_embedding).label(
+                    "distance"
+                ),
+            )
+            .where(ICD10CodeEntity.embedding.is_not(None))
+            .order_by("distance")
+            .limit(limit)
+        )
+        rows = self._session.execute(stmt).fetchall()
         return [
-            {"code": r.code, "description": r.description, "sim": r.sim}
+            {"code": r.code, "description": r.description, "sim": 1 - r.distance}
             for r in rows
         ]
