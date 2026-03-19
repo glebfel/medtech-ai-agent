@@ -1,0 +1,90 @@
+[
+  {
+    "medication": "amoxicillin",
+    "dose_mg_per_kg_min": 25, "dose_mg_per_kg_max": 50, "max_daily_mg": 3000,
+    "frequency": "every 8 hours (3 times daily)", "form": "oral", "min_age": 0,
+    "pediatric_note": "Use 80-90 mg/kg/day for acute otitis media.",
+    "adult_note": "Standard: 500 mg every 8h or 875 mg every 12h.",
+    "geriatric_note": "Adjust for renal function (CrCl < 30 mL/min)."
+  },
+  {
+    "medication": "ibuprofen",
+    "dose_mg_per_kg_min": 5, "dose_mg_per_kg_max": 10, "max_daily_mg": 2400,
+    "frequency": "every 6-8 hours", "form": "oral", "min_age": 0.5,
+    "pediatric_note": "Not recommended under 6 months. 5-10 mg/kg/dose.",
+    "adult_note": "Standard: 200-400 mg every 4-6h. Max 3200 mg/day for anti-inflammatory.",
+    "geriatric_note": "Caution: increased risk of GI bleeding and renal impairment."
+  },
+  {
+    "medication": "paracetamol",
+    "dose_mg_per_kg_min": 10, "dose_mg_per_kg_max": 15, "max_daily_mg": 4000,
+    "frequency": "every 4-6 hours", "form": "oral", "min_age": 0,
+    "pediatric_note": "10-15 mg/kg/dose, max 5 doses per day.",
+    "adult_note": "500-1000 mg every 4-6h. Max 4 g/day (2 g with liver disease).",
+    "geriatric_note": "Max 2-3 g/day in elderly or hepatic impairment."
+  },
+  {
+    "medication": "azithromycin",
+    "dose_mg_per_kg_min": 5, "dose_mg_per_kg_max": 12, "max_daily_mg": 500,
+    "frequency": "once daily", "form": "oral", "min_age": 0.5,
+    "pediatric_note": "10 mg/kg day 1, then 5 mg/kg days 2-5.",
+    "adult_note": "500 mg day 1, then 250 mg days 2-5.",
+    "geriatric_note": "No dose adjustment. Monitor QT prolongation."
+  },
+  {
+    "medication": "prednisolone",
+    "dose_mg_per_kg_min": 0.5, "dose_mg_per_kg_max": 2, "max_daily_mg": 80,
+    "frequency": "once daily or divided twice daily", "form": "oral", "min_age": 0,
+    "pediatric_note": "Asthma exacerbation: 1-2 mg/kg/day for 3-5 days (max 60 mg).",
+    "adult_note": "Varies by indication. Typical: 5-60 mg/day.",
+    "geriatric_note": "Lowest effective dose. Monitor glucose and bone density."
+  },
+  {
+    "medication": "cetirizine",
+    "dose_mg_per_kg_min": 0.125, "dose_mg_per_kg_max": 0.25, "max_daily_mg": 10,
+    "frequency": "once daily", "form": "oral", "min_age": 2,
+    "pediatric_note": "Ages 2-5: 2.5 mg. Ages 6-11: 5 mg. Ages 12+: 10 mg.",
+    "adult_note": "10 mg once daily.",
+    "geriatric_note": "Start 5 mg/day. Adjust for renal function."
+  },
+  {
+    "medication": "metformin",
+    "dose_mg_per_kg_min": 10, "dose_mg_per_kg_max": 25, "max_daily_mg": 2550,
+    "frequency": "with meals, 2-3 times daily", "form": "oral", "min_age": 10,
+    "pediatric_note": "Ages 10+. Start 500 mg twice daily.",
+    "adult_note": "Start 500 mg BID. Titrate to 1500-2000 mg/day.",
+    "geriatric_note": "Avoid if eGFR < 30. Caution if eGFR 30-45."
+  },
+  {
+    "medication": "omeprazole",
+    "dose_mg_per_kg_min": 0.5, "dose_mg_per_kg_max": 1.5, "max_daily_mg": 40,
+    "frequency": "once daily, before breakfast", "form": "oral", "min_age": 1,
+    "pediatric_note": "Ages 1-16: 0.7-3.3 mg/kg/day. Max 20 mg.",
+    "adult_note": "20 mg daily. GERD: 20-40 mg for 4-8 weeks.",
+    "geriatric_note": "No adjustment. Avoid prolonged use (fracture, B12 risk)."
+  },
+  {
+    "medication": "salbutamol",
+    "dose_mg_per_kg_min": 0.1, "dose_mg_per_kg_max": 0.15, "max_daily_mg": 32,
+    "frequency": "every 4-6 hours PRN (inhaler: 1-2 puffs)", "form": "inhaler / nebulizer", "min_age": 0,
+    "pediatric_note": "MDI: 1-2 puffs q4-6h. Nebulizer: 0.15 mg/kg/dose.",
+    "adult_note": "MDI: 1-2 puffs q4-6h PRN. Nebulizer: 2.5-5 mg.",
+    "geriatric_note": "Caution in cardiovascular disease."
+  },
+  {
+    "medication": "amoxicillin/clavulanate",
+    "dose_mg_per_kg_min": 25, "dose_mg_per_kg_max": 45, "max_daily_mg": 3000,
+    "frequency": "every 8-12 hours", "form": "oral", "min_age": 0,
+    "pediatric_note": "25-45 mg/kg/day (amoxicillin component) divided.",
+    "adult_note": "625 mg q8h or 1000 mg q12h.",
+    "geriatric_note": "Adjust for renal function. Monitor liver."
+  },
+  {
+    "medication": "dexamethasone",
+    "dose_mg_per_kg_min": 0.15, "dose_mg_per_kg_max": 0.6, "max_daily_mg": 20,
+    "frequency": "once or twice daily", "form": "oral / IV / IM", "min_age": 0,
+    "pediatric_note": "Croup: 0.15-0.6 mg/kg single dose.",
+    "adult_note": "Varies. Anti-inflammatory: 0.5-9 mg/day.",
+    "geriatric_note": "Lowest effective dose. Monitor glucose."
+  }
+]

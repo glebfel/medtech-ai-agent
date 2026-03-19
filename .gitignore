@@ -1,0 +1,82 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+venv3/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Pyenv
+.python-version
+
+# Logs
+logs/
+celery/
+
+# CLI scripts
+sync.sh
+prod_cli.sh
+qa_cli.sh
+stage_cli.sh
+admin_qa_cli.sh
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Data files
+/*.csv
+/*.json
+
+# Temp
+tmp/
+
+# Celery
+celerybeat-schedule
+celerybeat-schedule.db
+
+# Static/Data
+static/
+
+# Claude
+.claude/
+
+# Swagger
+swagger.json
+swagger_trusted.json
+swagger_disabled.json
+
+# Linting
+.isort.cfg
+
+# Testing/Coverage
+.coverage
+htmlcov/
+nosetests.xml
+.pytest_cache/
+.tox/
+
+# Type checking
+.mypy_cache/
+
+# Build/Package
+*.egg-info/
+*.egg
+dist/
+build/
+
+# OS
+.DS_Store
+
