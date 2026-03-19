@@ -24,7 +24,7 @@ class ChatSessionService:
             repo.update_title(thread_id=thread_id, title=title)
 
     @staticmethod
-    def list(query: str = "", limit: int = 15) -> list[dict]:
+    def list_recent(query: str = "", limit: int = 15) -> list[dict]:
         with get_session() as session:
             repo = ChatSessionRepository(session)
             entities = repo.list_recent(limit=limit, query=query)

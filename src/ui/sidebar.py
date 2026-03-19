@@ -148,7 +148,7 @@ def _render_chat_history_section() -> None:
         key="_chat_search",
         debounce=300,
     )
-    sessions = ChatSessionService.list(query=search_query, limit=limit)
+    sessions = ChatSessionService.list_recent(query=search_query, limit=limit)
     if not sessions:
         st.caption("No conversations found" if search_query else "No conversations yet")
         return
