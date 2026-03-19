@@ -1,0 +1,55 @@
+from langchain_core.language_models import BaseChatModel
+
+from src.agent.prompts import TITLE_GENERATION_PROMPT
+from src.db import get_session
+from src.logging_config import get_logger
+from src.repositories.chat_session import ChatSessionRepository
+
+logger = get_logger("services.chat_session")
+
+
+def generate_title(message: str, llm: BaseChatModel | None = None) -> str:
+    if llm:
+        try:
+            response = llm.invoke(f"{TITLE_GENERATION_PROMPT}\n\n{message[:300]}")
+            title = response.content.strip().strip('"').strip("«»")
+            if title:
+                return title[:100]
+        except Exception as e:
+            logger.warning("LLM title generation failed, falling back to truncation: %s", e)
+    return message[:60].strip() + ("..." if len(message) > 60 else "")
+
+
+def save_session(thread_id: str, title: str) -> None:
+    with get_session() as session:
+        repo = ChatSessionRepository(session)
+        existing = repo.find_by_thread_id(thread_id)
+        if not existing:
+            repo.create(thread_id=thread_id, title=title)
+
+
+def rename_session(thread_id: str, title: str) -> None:
+    with get_session() as session:
+        repo = ChatSessionRepository(session)
+        repo.update_title(thread_id=thread_id, title=title)
+
+
+def list_sessions() -> list[dict]:
+    with get_session() as session:
+        repo = ChatSessionRepository(session)
+        entities = repo.list_recent()
+        return [
+            {
+                "thread_id": e.thread_id,
+                "title": e.title,
+                "created_at": e.created_at,
+                "updated_at": e.updated_at,
+            }
+            for e in entities
+        ]
+
+
+def delete_session(thread_id: str) -> None:
+    with get_session() as session:
+        repo = ChatSessionRepository(session)
+        repo.delete(thread_id)

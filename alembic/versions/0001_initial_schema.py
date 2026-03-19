@@ -71,8 +71,18 @@ def upgrade() -> None:
         sa.Column("geriatric_note", sa.Text, nullable=False),
     )
 
+    op.create_table(
+        "chat_sessions",
+        sa.Column("id", sa.Integer, primary_key=True),
+        sa.Column("thread_id", sa.String(36), unique=True, nullable=False),
+        sa.Column("title", sa.Text, nullable=False),
+        sa.Column("created_at", sa.DateTime, server_default=sa.func.now(), nullable=False),
+        sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), nullable=False),
+    )
+
 
 def downgrade() -> None:
+    op.drop_table("chat_sessions")
     op.drop_table("dosage_info")
     op.drop_table("med_terms")
     op.drop_table("icd10_codes")

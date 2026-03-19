@@ -6,6 +6,7 @@ from src.models.dosage import DosageInfoEntity  # noqa: F401
 from src.models.drug_interaction import DrugInteractionEntity  # noqa: F401
 from src.models.icd10 import ICD10CodeEntity  # noqa: F401
 from src.models.med_term import MedTermEntity  # noqa: F401
+from src.models.chat_session import ChatSessionEntity  # noqa: F401
 
 target_metadata = Base.metadata
 

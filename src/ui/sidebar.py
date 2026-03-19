@@ -4,6 +4,7 @@ import streamlit as st
 
 from src.agent.health import check_anthropic, check_gigachat, check_ollama, check_openai
 from src.schemas.enums import LLMProvider
+from src.services.chat_session import delete_session, list_sessions, rename_session
 from src.settings import Settings
 from src.ui.constants import EXAMPLES, PROVIDER_MODELS, TOOL_LABELS
 
@@ -45,6 +46,32 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
     return False, "Unknown provider"
 
 
+def _render_chat_history_section() -> None:
+    st.header("Chat History")
+
+    sessions = list_sessions()
+    if not sessions:
+        st.caption("No conversations yet")
+        return
+
+    for s in sessions:
+        col_title, col_del = st.columns([5, 1])
+        with col_title:
+            if st.button(s["title"], key=f"sess_{s['thread_id']}", use_container_width=True):
+                st.session_state.thread_id = s["thread_id"]
+                st.session_state.messages = []
+                st.session_state.pop("agent", None)
+                st.session_state._load_from_history = True
+                st.rerun()
+        with col_del:
+            if st.button("\U0001f5d1", key=f"del_{s['thread_id']}"):
+                delete_session(s["thread_id"])
+                if st.session_state.get("thread_id") == s["thread_id"]:
+                    st.session_state.thread_id = str(uuid.uuid4())
+                    st.session_state.messages = []
+                st.rerun()
+
+
 def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
     with st.sidebar:
         st.header("Settings")
@@ -74,7 +101,11 @@ def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
         if st.button("New conversation", use_container_width=True):
             st.session_state.messages = []
             st.session_state.thread_id = str(uuid.uuid4())
+            st.session_state.pop("_current_title", None)
             st.rerun()
+
+        st.divider()
+        _render_chat_history_section()
 
         st.divider()
         st.header("Statistics")
