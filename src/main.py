@@ -5,7 +5,7 @@ import streamlit as st
 
 from src.agent.graph import build_agent
 from src.logging_config import get_logger
-from src.services.chat_session import generate_title, restore_messages, save_session
+from src.services.chat_session import ChatSessionService
 from src.services.infrastructure import init_infrastructure
 from src.ui.chat import process_response, render_chat_history, render_title_editor
 from src.ui.sidebar import render_sidebar
@@ -31,7 +31,7 @@ def main() -> None:
         st.session_state.tool_usage = {}
 
     if st.session_state.pop("_load_from_history", False):
-        st.session_state.messages = restore_messages(
+        st.session_state.messages = ChatSessionService.restore_messages(
             checkpointer, thread_id=st.session_state.thread_id,
         )
 
@@ -109,8 +109,8 @@ def main() -> None:
         st.session_state.messages.append(assistant_msg)
 
         if len(st.session_state.messages) == 2:
-            title = generate_title(prompt)
-            save_session(thread_id=thread_id, title=title)
+            title = ChatSessionService.generate_title(prompt)
+            ChatSessionService.save(thread_id=thread_id, title=title)
             st.session_state._current_title = title
 
         st.rerun()

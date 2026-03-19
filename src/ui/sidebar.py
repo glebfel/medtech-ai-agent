@@ -15,7 +15,7 @@ from src.agent.health import (
     pull_ollama_model,
 )
 from src.schemas.enums import LLMProvider
-from src.services.chat_session import delete_session, list_sessions
+from src.services.chat_session import ChatSessionService
 from src.settings import Settings
 from src.ui.constants import EXAMPLES, OLLAMA_MODEL_INFO, PROVIDER_MODELS, TOOL_LABELS
 
@@ -135,7 +135,12 @@ def _render_ollama_model_selector(base_url: str) -> str:
 
 
 def _render_chat_history_section() -> None:
-    st.header("Chat History")
+    from src.settings import get_settings
+    limit = get_settings().max_visible_chats
+
+    total = ChatSessionService.count()
+    label = f"Chat History ({total})" if total > limit else "Chat History"
+    st.header(label)
 
     search_query = st_keyup(
         "",
@@ -143,7 +148,7 @@ def _render_chat_history_section() -> None:
         key="_chat_search",
         debounce=300,
     )
-    sessions = list_sessions(query=search_query)
+    sessions = ChatSessionService.list(query=search_query, limit=limit)
     if not sessions:
         st.caption("No conversations found" if search_query else "No conversations yet")
         return
@@ -159,7 +164,7 @@ def _render_chat_history_section() -> None:
                 st.rerun()
         with col_del:
             if st.button("\U0001f5d1", key=f"del_{s['thread_id']}"):
-                delete_session(s["thread_id"])
+                ChatSessionService.delete(s["thread_id"])
                 if st.session_state.get("thread_id") == s["thread_id"]:
                     st.session_state.thread_id = str(uuid.uuid4())
                     st.session_state.messages = []

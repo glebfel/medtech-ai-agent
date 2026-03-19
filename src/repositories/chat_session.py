@@ -25,7 +25,7 @@ class ChatSessionRepository:
         if entity:
             entity.title = title
 
-    def list_recent(self, limit: int = 50, query: str = "") -> list[ChatSessionEntity]:
+    def list_recent(self, limit: int = 15, query: str = "") -> list[ChatSessionEntity]:
         stmt = select(ChatSessionEntity)
         if query:
             q = query.strip()
@@ -38,6 +38,10 @@ class ChatSessionRepository:
             )
         stmt = stmt.order_by(ChatSessionEntity.updated_at.desc()).limit(limit)
         return list(self._session.execute(stmt).scalars().all())
+
+    def count(self) -> int:
+        stmt = select(func.count()).select_from(ChatSessionEntity)
+        return self._session.execute(stmt).scalar_one()
 
     def delete(self, thread_id: str) -> None:
         entity = self.find_by_thread_id(thread_id)

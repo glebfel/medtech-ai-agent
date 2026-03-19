@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     # Input limits
     max_input_length: int = 5000
     max_history_messages: int = 40
+    max_visible_chats: int = 15
 
     # Database
     db_host: str = "localhost"
