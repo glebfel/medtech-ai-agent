@@ -46,5 +46,5 @@ def init_infrastructure():
 
     checkpointer = create_checkpointer(settings.database_url)
 
-    logger.info("Infrastructure initialized, LLM provider=%s", settings.llm_provider.value)
+    logger.info("Infrastructure initialized, LLM provider=%s", settings.default_llm_provider.value)
     return checkpointer, settings

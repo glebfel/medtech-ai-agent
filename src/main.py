@@ -40,7 +40,7 @@ def main() -> None:
         or st.session_state.get("_model") != model_name
     )
     if needs_rebuild:
-        settings_override = settings.model_copy(update={"llm_provider": provider})
+        settings_override = settings.model_copy(update={"default_llm_provider": provider})
         st.session_state.agent = build_agent(
             settings_override, checkpointer=checkpointer, temperature=temperature, model_name=model_name,
         )

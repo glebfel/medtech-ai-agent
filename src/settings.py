@@ -14,15 +14,13 @@ class Settings(BaseSettings):
     )
 
     # LLM
-    llm_provider: LLMProvider = LLMProvider.OPENAI
+    default_llm_provider: LLMProvider = LLMProvider.OPENAI
 
     # OpenAI
     openai_api_key: SecretStr = SecretStr("")
-    openai_model: str = "gpt-5.4-mini"
 
     # Anthropic (Claude)
     anthropic_api_key: SecretStr = SecretStr("")
-    anthropic_model: str = "claude-sonnet-4-6"
 
     # GigaChat
     gigachat_client_id: SecretStr = SecretStr("")
@@ -41,7 +39,6 @@ class Settings(BaseSettings):
         return base64.b64encode(f"{cid}:{secret}".encode()).decode()
 
     # Ollama
-    ollama_model: str = "llama3.1"
     ollama_base_url: str = "http://localhost:11434"
 
     # Health check
@@ -75,7 +72,7 @@ class Settings(BaseSettings):
             f"@{self.db_host}:{self.db_port}/{self.db_name}"
         )
 
-    @field_validator("llm_provider", mode="before")
+    @field_validator("default_llm_provider", mode="before")
     @classmethod
     def _normalize_provider(cls, v: str) -> str:
         return v.strip().lower()

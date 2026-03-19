@@ -9,7 +9,7 @@ from openai import OpenAI
 def check_openai(api_key: str, timeout: int = 5) -> tuple[bool, str]:
     try:
         client = OpenAI(api_key=api_key, timeout=timeout)
-        client.models.list(limit=1)
+        client.models.list()
         return True, ""
     except Exception as e:
         return False, _short_error(e)
@@ -19,7 +19,7 @@ def check_openai(api_key: str, timeout: int = 5) -> tuple[bool, str]:
 def check_anthropic(api_key: str, timeout: int = 5) -> tuple[bool, str]:
     try:
         client = Anthropic(api_key=api_key, timeout=timeout)
-        client.models.list(limit=1)
+        client.models.list()
         return True, ""
     except Exception as e:
         return False, _short_error(e)
@@ -63,6 +63,46 @@ def list_ollama_models(base_url: str, timeout: int = 5) -> list[dict]:
             }
             for m in response.models
         ]
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def list_openai_models(api_key: str, timeout: int = 5) -> list[str]:
+    try:
+        client = OpenAI(api_key=api_key, timeout=timeout)
+        models = client.models.list()
+        excluded = {"instruct", "realtime", "codex", "audio", "search", "embed", "image", "nano"}
+        return sorted([
+            m.id for m in models
+            if m.id.startswith("gpt-")
+            and not any(ex in m.id for ex in excluded)
+        ], reverse=True)
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def list_anthropic_models(api_key: str, timeout: int = 5) -> list[str]:
+    try:
+        client = Anthropic(api_key=api_key, timeout=timeout)
+        models = client.models.list(limit=20)
+        return [m.id for m in models.data]
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def list_gigachat_models(credentials: str, scope: str, verify_ssl: bool, timeout: int = 5) -> list[str]:
+    try:
+        client = GigaChat(
+            credentials=credentials,
+            scope=scope,
+            verify_ssl_certs=verify_ssl,
+            timeout=timeout,
+        )
+        models = client.get_models()
+        return [m.id for m in models.data]
     except Exception:
         return []
 

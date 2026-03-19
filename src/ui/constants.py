@@ -5,6 +5,14 @@ PROVIDER_MODELS: dict[str, list[str]] = {
     "ollama": ["llama3.1", "deepseek-r1", "qwen3", "phi4", "gemma2"],
 }
 
+OLLAMA_MODEL_INFO: dict[str, str] = {
+    "llama3.1": "8B, ~4.7 GB",
+    "deepseek-r1": "7B, ~4.7 GB",
+    "qwen3": "8B, ~4.9 GB",
+    "phi4": "14B, ~8.4 GB",
+    "gemma2": "9B, ~5.4 GB",
+}
+
 TOOL_LABELS = {
     "drug_interaction_checker": "Drug Interactions",
     "bmi_calculator": "BMI Calculator",

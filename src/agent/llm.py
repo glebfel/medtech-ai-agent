@@ -6,21 +6,26 @@ from langchain_openai import ChatOpenAI
 
 from src.schemas.enums import LLMProvider
 from src.settings import Settings
+from src.ui.constants import PROVIDER_MODELS
+
+_DEFAULT_MODELS: dict[str, str] = {
+    k: v[0] for k, v in PROVIDER_MODELS.items()
+}
 
 
 def create_llm(settings: Settings, temperature: float = 0.1, model_name: str = "") -> BaseChatModel:
-    provider = settings.llm_provider
+    provider = settings.default_llm_provider
 
     if provider == LLMProvider.OPENAI:
         return ChatOpenAI(
-            model=model_name or settings.openai_model,
+            model=model_name or _DEFAULT_MODELS["openai"],
             api_key=settings.openai_api_key,
             temperature=temperature,
         )
 
     if provider == LLMProvider.ANTHROPIC:
         return ChatAnthropic(
-            model=model_name or settings.anthropic_model,
+            model=model_name or _DEFAULT_MODELS["anthropic"],
             api_key=settings.anthropic_api_key,
             temperature=temperature,
         )
@@ -29,14 +34,14 @@ def create_llm(settings: Settings, temperature: float = 0.1, model_name: str = "
         return GigaChat(
             credentials=settings.gigachat_credentials,
             scope=settings.gigachat_scope,
-            model=model_name or "GigaChat-2",
+            model=model_name or _DEFAULT_MODELS["gigachat"],
             verify_ssl_certs=settings.gigachat_verify_ssl,
             temperature=temperature,
         )
 
     if provider == LLMProvider.OLLAMA:
         return ChatOllama(
-            model=model_name or settings.ollama_model,
+            model=model_name or _DEFAULT_MODELS["ollama"],
             base_url=settings.ollama_base_url,
             temperature=temperature,
         )

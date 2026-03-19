@@ -8,13 +8,16 @@ from src.agent.health import (
     check_gigachat,
     check_ollama,
     check_openai,
+    list_anthropic_models,
+    list_gigachat_models,
     list_ollama_models,
+    list_openai_models,
     pull_ollama_model,
 )
 from src.schemas.enums import LLMProvider
 from src.services.chat_session import delete_session, list_sessions
 from src.settings import Settings
-from src.ui.constants import EXAMPLES, PROVIDER_MODELS, TOOL_LABELS
+from src.ui.constants import EXAMPLES, OLLAMA_MODEL_INFO, PROVIDER_MODELS, TOOL_LABELS
 
 
 _NO_KEY_ERRORS = {"API-ключ не задан", "Client ID / Secret не заданы"}
@@ -64,6 +67,29 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
     return False, "Unknown provider"
 
 
+def _get_provider_models(settings: Settings, selected_provider: LLMProvider, available: bool) -> list[str]:
+    fallback = PROVIDER_MODELS.get(selected_provider.value, [])
+    if not available:
+        return fallback
+
+    timeout = settings.health_check_timeout
+    if selected_provider == LLMProvider.OPENAI:
+        models = list_openai_models(settings.openai_api_key.get_secret_value(), timeout=timeout)
+    elif selected_provider == LLMProvider.ANTHROPIC:
+        models = list_anthropic_models(settings.anthropic_api_key.get_secret_value(), timeout=timeout)
+    elif selected_provider == LLMProvider.GIGACHAT:
+        models = list_gigachat_models(
+            settings.gigachat_credentials,
+            scope=settings.gigachat_scope,
+            verify_ssl=settings.gigachat_verify_ssl,
+            timeout=timeout,
+        )
+    else:
+        return fallback
+
+    return models or fallback
+
+
 def _render_ollama_model_selector(base_url: str) -> str:
     installed = list_ollama_models(base_url)
     installed_names = [m["name"] for m in installed]
@@ -85,7 +111,12 @@ def _render_ollama_model_selector(base_url: str) -> str:
     available_to_pull = [m for m in PROVIDER_MODELS["ollama"] if m not in installed_names]
     with st.expander("Pull new model"):
         if available_to_pull:
-            selected = st.selectbox("Select model", available_to_pull, key="_ollama_pull_select")
+            selected = st.selectbox(
+                "Select model",
+                available_to_pull,
+                key="_ollama_pull_select",
+                format_func=lambda m: f"{m} ({OLLAMA_MODEL_INFO[m]})" if m in OLLAMA_MODEL_INFO else m,
+            )
             if st.button("Pull", key="_ollama_pull_btn", use_container_width=True):
                 with st.spinner(f"Pulling {selected}..."):
                     success, err = pull_ollama_model(base_url, model_name=selected)
@@ -142,7 +173,7 @@ def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
         for p in providers:
             statuses[p] = _check_provider(settings, p)
 
-        default_idx = providers.index(settings.llm_provider)
+        default_idx = providers.index(settings.default_llm_provider)
         selected_provider = st.selectbox(
             "LLM Provider",
             providers,
@@ -157,7 +188,7 @@ def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
         if selected_provider == LLMProvider.OLLAMA and ok:
             model_name = _render_ollama_model_selector(settings.ollama_base_url)
         else:
-            models = PROVIDER_MODELS.get(selected_provider.value, [])
+            models = _get_provider_models(settings, selected_provider=selected_provider, available=ok)
             model_name = st.selectbox("Model", models, index=0) if models else ""
 
         temperature = st.slider("Temperature", 0.0, 1.0, 0.1, 0.05)
