@@ -25,19 +25,19 @@ def render_title_editor() -> None:
 
 
 def render_chat_history() -> None:
-    for msg in st.session_state.messages:
+    for idx, msg in enumerate(st.session_state.messages):
         with st.chat_message(msg["role"]):
             if msg["role"] == "assistant":
-                _render_assistant_message(msg)
+                _render_assistant_message(msg, idx=idx)
             else:
                 st.markdown(msg["content"])
 
 
-def _render_assistant_message(msg: dict) -> None:
+def _render_assistant_message(msg: dict, idx: int = 0) -> None:
     if msg.get("bmi_value"):
-        render_bmi_gauge(msg["bmi_value"])
+        render_bmi_gauge(msg["bmi_value"], key=f"bmi_history_{idx}")
     if msg.get("icd10_data"):
-        st.dataframe(pd.DataFrame(msg["icd10_data"]), use_container_width=True)
+        st.dataframe(pd.DataFrame(msg["icd10_data"]), use_container_width=True, key=f"icd10_history_{idx}")
     if msg.get("tools_used"):
         labels = [TOOL_LABELS.get(t, t) for t in msg["tools_used"]]
         st.caption(f"Instruments: {', '.join(labels)}")
@@ -62,12 +62,12 @@ def process_response(result: dict) -> dict:
         if tool_name == "bmi_calculator":
             bmi_value = parse_bmi(msg.content)
             if bmi_value:
-                render_bmi_gauge(bmi_value)
+                render_bmi_gauge(bmi_value, key="bmi_current")
 
         elif tool_name == "icd10_search":
             icd10_data = parse_icd10(msg.content)
             if icd10_data:
-                st.dataframe(pd.DataFrame(icd10_data), use_container_width=True)
+                st.dataframe(pd.DataFrame(icd10_data), use_container_width=True, key="icd10_current")
 
     if tools_used:
         labels = [TOOL_LABELS.get(t, t) for t in tools_used]

@@ -16,7 +16,7 @@ def _init():
 
 
 def main() -> None:
-    st.set_page_config(page_title="MedAssist", page_icon="\U0001f3e5", layout="wide")
+    st.set_page_config(page_title="MedAssistAI", page_icon="\U0001f3e5", layout="wide")
 
     checkpointer, settings = _init()
 
@@ -51,7 +51,7 @@ def main() -> None:
 
     agent = st.session_state.agent
 
-    st.title("MedAssist")
+    st.title("MedAssistAI")
     st.caption("AI Clinical Decision Support Assistant")
 
     render_title_editor()

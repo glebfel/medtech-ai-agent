@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
-def render_bmi_gauge(bmi: float) -> None:
+def render_bmi_gauge(bmi: float, key: str | None = None) -> None:
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=bmi,
@@ -26,4 +26,4 @@ def render_bmi_gauge(bmi: float) -> None:
         },
     ))
     fig.update_layout(height=280, margin=dict(t=60, b=0, l=30, r=30))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key=key)
