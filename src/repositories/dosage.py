@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from src.models.entities import DosageInfoEntity
+from src.models.dosage import DosageInfoEntity
 
 
 class DosageRepository:

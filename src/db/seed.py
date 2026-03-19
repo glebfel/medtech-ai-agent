@@ -4,15 +4,13 @@ import os
 from sqlalchemy.orm import Session
 
 from src.logging_config import get_logger
+from src.models.dosage import DosageInfoEntity
+from src.models.drug_interaction import DrugInteractionEntity
+from src.models.icd10 import ICD10CodeEntity
+from src.models.med_term import MedTermEntity
+
 
 logger = get_logger("db.seed")
-
-from src.models.entities import (
-    DosageInfoEntity,
-    DrugInteractionEntity,
-    ICD10CodeEntity,
-    MedTermEntity,
-)
 
 
 def seed_if_empty(session: Session, data_dir: str = "data") -> None:

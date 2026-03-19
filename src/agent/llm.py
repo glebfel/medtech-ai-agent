@@ -8,7 +8,6 @@ from src.settings import Settings
 
 
 def create_llm(settings: Settings, temperature: float = 0.1) -> BaseChatModel:
-    """Create LLM instance based on the configured provider."""
     provider = settings.llm_provider
 
     if provider == LLMProvider.OPENAI:

@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
-from src.models.entities import MedTermEntity
+from src.models.med_term import MedTermEntity
 
 
 class MedTermsRepository:

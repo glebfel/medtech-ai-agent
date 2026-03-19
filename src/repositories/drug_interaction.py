@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from src.models.entities import DrugInteractionEntity
+from src.models.drug_interaction import DrugInteractionEntity
 
 
 class DrugInteractionRepository:
