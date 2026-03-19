@@ -49,9 +49,14 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
 def _render_chat_history_section() -> None:
     st.header("Chat History")
 
-    sessions = list_sessions()
+    search_query = st.text_input(
+        "Search chats",
+        placeholder="Search...",
+        label_visibility="collapsed",
+    )
+    sessions = list_sessions(query=search_query)
     if not sessions:
-        st.caption("No conversations yet")
+        st.caption("No conversations found" if search_query else "No conversations yet")
         return
 
     for s in sessions:

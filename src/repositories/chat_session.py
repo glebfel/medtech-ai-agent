@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from src.models.chat_session import ChatSessionEntity
@@ -25,12 +25,13 @@ class ChatSessionRepository:
         if entity:
             entity.title = title
 
-    def list_recent(self, limit: int = 50) -> list[ChatSessionEntity]:
-        stmt = (
-            select(ChatSessionEntity)
-            .order_by(ChatSessionEntity.updated_at.desc())
-            .limit(limit)
-        )
+    def list_recent(self, limit: int = 50, query: str = "") -> list[ChatSessionEntity]:
+        stmt = select(ChatSessionEntity)
+        if query:
+            stmt = stmt.where(
+                func.lower(ChatSessionEntity.title).op("%%")(func.lower(query.strip()))
+            )
+        stmt = stmt.order_by(ChatSessionEntity.updated_at.desc()).limit(limit)
         return list(self._session.execute(stmt).scalars().all())
 
     def delete(self, thread_id: str) -> None:

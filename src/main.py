@@ -52,10 +52,7 @@ def main() -> None:
     agent = st.session_state.agent
 
     st.title("MedAssist")
-    st.caption(
-        "AI Clinical Decision Support Assistant | "
-        "Not a substitute for professional medical judgment"
-    )
+    st.caption("AI Clinical Decision Support Assistant")
 
     render_title_editor()
     render_chat_history()

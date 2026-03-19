@@ -34,10 +34,10 @@ def rename_session(thread_id: str, title: str) -> None:
         repo.update_title(thread_id=thread_id, title=title)
 
 
-def list_sessions() -> list[dict]:
+def list_sessions(query: str = "") -> list[dict]:
     with get_session() as session:
         repo = ChatSessionRepository(session)
-        entities = repo.list_recent()
+        entities = repo.list_recent(query=query)
         return [
             {
                 "thread_id": e.thread_id,

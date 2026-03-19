@@ -79,6 +79,13 @@ def upgrade() -> None:
         sa.Column("created_at", sa.DateTime, server_default=sa.func.now(), nullable=False),
         sa.Column("updated_at", sa.DateTime, server_default=sa.func.now(), nullable=False),
     )
+    op.create_index(
+        "idx_chat_sessions_title_trgm",
+        "chat_sessions",
+        ["title"],
+        postgresql_using="gin",
+        postgresql_ops={"title": "gin_trgm_ops"},
+    )
 
 
 def downgrade() -> None:
