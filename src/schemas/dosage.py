@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 
 class DosageInfo(BaseModel):
-    """Reference data for a medication's dosing parameters."""
     dose_mg_per_kg_min: float
     dose_mg_per_kg_max: float
     max_daily_mg: float
@@ -35,7 +34,6 @@ class DosageInfo(BaseModel):
 
 
 class DosageResult(BaseModel):
-    """Result of a dosage calculation."""
     daily_dose_min_mg: float
     daily_dose_max_mg: float
     max_daily_mg: float

@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+.idea
+__pycache__
+*.pyc
+venv
+.venv
+*.egg-info
+.pytest_cache
+.mypy_cache
+medassist_memory.db
+alembic/versions/__pycache__

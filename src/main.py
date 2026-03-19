@@ -2,6 +2,8 @@ import os
 import uuid
 
 import streamlit as st
+from alembic import command
+from alembic.config import Config
 from dotenv import load_dotenv
 
 from src.agent.graph import build_agent
@@ -14,6 +16,13 @@ from src.ui.chat import process_response, render_chat_history
 from src.ui.sidebar import render_sidebar
 
 logger = get_logger("main")
+
+
+def _run_migrations(database_url: str) -> None:
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", database_url)
+    command.upgrade(alembic_cfg, "head")
+    logger.info("Database migrations applied")
 
 
 @st.cache_resource
@@ -29,7 +38,13 @@ def _init_infrastructure():
         os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
         logger.info("LangSmith tracing enabled (project=%s)", settings.langchain_project)
 
-    init_engine(settings.database_url)
+    _run_migrations(settings.database_url)
+
+    init_engine(
+        settings.database_url,
+        pool_size=settings.db_pool_size,
+        max_overflow=settings.db_max_overflow,
+    )
     with get_session() as session:
         seed_if_empty(session, settings.data_dir)
 

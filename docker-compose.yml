@@ -2,18 +2,19 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: medassist
-      POSTGRES_USER: medassist
-      POSTGRES_PASSWORD: medassist
+      POSTGRES_DB: ${DB_NAME:-medassist}
+      POSTGRES_USER: ${DB_USER:-medassist}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-medassist}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U medassist"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-medassist}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   app:
     build: .
@@ -25,6 +26,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
     volumes:
       - ./data:/app/data:ro
 

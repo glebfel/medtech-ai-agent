@@ -6,7 +6,6 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from src.logging_config import get_logger
-from src.models.base import Base
 
 logger = get_logger("db.engine")
 
@@ -20,18 +19,21 @@ def _to_sqlalchemy_url(database_url: str) -> str:
     return database_url
 
 
-def init_engine(database_url: str) -> None:
+def init_engine(
+    database_url: str,
+    pool_size: int = 5,
+    max_overflow: int = 10,
+) -> None:
     global _engine, _session_factory
 
     url = _to_sqlalchemy_url(database_url)
-    _engine = create_engine(url, pool_size=5, max_overflow=10, pool_pre_ping=True)
+    _engine = create_engine(url, pool_size=pool_size, max_overflow=max_overflow, pool_pre_ping=True)
     _session_factory = sessionmaker(bind=_engine, expire_on_commit=False)
 
     with _engine.connect() as conn:
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS pg_trgm"))
         conn.commit()
 
-    Base.metadata.create_all(_engine)
     logger.info("Database engine initialized (host=%s, db=%s)", _engine.url.host, _engine.url.database)
 
 

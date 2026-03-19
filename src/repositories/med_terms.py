@@ -11,14 +11,12 @@ class MedTermsRepository:
         self._session = session
 
     def find_by_term(self, term: str) -> Optional[MedTermEntity]:
-        """Exact case-insensitive match."""
         stmt = select(MedTermEntity).where(
             func.lower(MedTermEntity.term) == term.strip().lower()
         )
         return self._session.execute(stmt).scalar_one_or_none()
 
     def find_similar(self, term: str, threshold: float = 0.3) -> Optional[MedTermEntity]:
-        """Fuzzy match using pg_trgm similarity."""
         stmt = text("""
             SELECT id, term, explanation,
                    similarity(LOWER(term), LOWER(:term)) AS sim

@@ -3,7 +3,6 @@ import streamlit as st
 
 
 def render_bmi_gauge(bmi: float) -> None:
-    """Render a BMI gauge chart colored by WHO categories."""
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=bmi,

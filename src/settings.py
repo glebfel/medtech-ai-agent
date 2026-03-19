@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field, computed_field, field_validator
+from pydantic import Field, computed_field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from src.schemas.enums import LLMProvider, LogLevel
@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     # GigaChat
     gigachat_credentials: str = ""
     gigachat_scope: str = "GIGACHAT_API_PERS"
+    gigachat_verify_ssl: bool = False
 
     # Ollama
     ollama_model: str = "llama3.1"
@@ -34,6 +35,8 @@ class Settings(BaseSettings):
     db_name: str = "medassist"
     db_user: str = "medassist"
     db_password: str = "medassist"
+    db_pool_size: int = 5
+    db_max_overflow: int = 10
 
     # Data paths
     data_dir: str = Field(default="data", description="Path to seed JSON files")
@@ -55,6 +58,14 @@ class Settings(BaseSettings):
     @classmethod
     def _normalize_provider(cls, v: str) -> str:
         return v.strip().lower()
+
+    @model_validator(mode="after")
+    def _validate_llm_credentials(self) -> "Settings":
+        if self.llm_provider == LLMProvider.OPENAI and not self.openai_api_key:
+            raise ValueError("OPENAI_API_KEY is required when LLM_PROVIDER=openai")
+        if self.llm_provider == LLMProvider.GIGACHAT and not self.gigachat_credentials:
+            raise ValueError("GIGACHAT_CREDENTIALS is required when LLM_PROVIDER=gigachat")
+        return self
 
 
 @lru_cache

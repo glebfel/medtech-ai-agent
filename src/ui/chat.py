@@ -8,7 +8,6 @@ from src.ui.parsers import parse_bmi, parse_icd10
 
 
 def render_chat_history() -> None:
-    """Render all stored messages with their visualizations."""
     for msg in st.session_state.messages:
         with st.chat_message(msg["role"]):
             if msg["role"] == "assistant":
@@ -18,7 +17,6 @@ def render_chat_history() -> None:
 
 
 def _render_assistant_message(msg: dict) -> None:
-    """Render a single assistant message with optional charts/tables."""
     if msg.get("bmi_value"):
         render_bmi_gauge(msg["bmi_value"])
     if msg.get("icd10_data"):
@@ -30,7 +28,6 @@ def _render_assistant_message(msg: dict) -> None:
 
 
 def process_response(result: dict) -> dict:
-    """Parse agent result: render visualizations inline and return storable message dict."""
     tools_used = []
     bmi_value = None
     icd10_data = []

@@ -13,8 +13,7 @@ class DrugInteractionRepository:
     def find_by_drug_pair(
         self, drug_a: str, drug_b: str
     ) -> Optional[DrugInteractionEntity]:
-        """Find interaction between two drugs using case-insensitive partial match."""
-        a = f"%{drug_a.strip().lower()}%"
+        a =f"%{drug_a.strip().lower()}%"
         b = f"%{drug_b.strip().lower()}%"
 
         stmt = (

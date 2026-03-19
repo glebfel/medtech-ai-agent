@@ -22,7 +22,7 @@ def create_llm(settings: Settings, temperature: float = 0.1) -> BaseChatModel:
             credentials=settings.gigachat_credentials,
             scope=settings.gigachat_scope,
             model="GigaChat",
-            verify_ssl_certs=False,
+            verify_ssl_certs=settings.gigachat_verify_ssl,
             temperature=temperature,
         )
 

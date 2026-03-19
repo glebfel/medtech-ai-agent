@@ -2,13 +2,11 @@ import re
 
 
 def parse_bmi(text: str) -> float | None:
-    """Extract BMI numeric value from tool output."""
     m = re.search(r"BMI:\s*([\d.]+)", text)
     return float(m.group(1)) if m else None
 
 
 def parse_icd10(text: str) -> list[dict]:
-    """Extract ICD-10 code/description rows from tool output."""
     results = []
     for line in text.split("\n"):
         m = re.match(

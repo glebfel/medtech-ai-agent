@@ -7,7 +7,6 @@ from src.ui.constants import EXAMPLES, TOOL_LABELS
 
 
 def render_sidebar(settings: Settings) -> float:
-    """Render the sidebar and return the selected temperature."""
     with st.sidebar:
         st.header("Settings")
 
