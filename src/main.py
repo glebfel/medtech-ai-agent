@@ -3,7 +3,6 @@ import uuid
 import streamlit as st
 
 from src.agent.graph import build_agent
-from src.agent.llm import create_llm
 from src.services.chat_session import generate_title, restore_messages, save_session
 from src.services.infrastructure import init_infrastructure
 from src.ui.chat import process_response, render_chat_history, render_title_editor
@@ -79,11 +78,7 @@ def main() -> None:
         st.session_state.messages.append(assistant_msg)
 
         if len(st.session_state.messages) == 2:
-            try:
-                llm = create_llm(settings_override, temperature=0.3, model_name=model_name)
-            except Exception:
-                llm = None
-            title = generate_title(prompt, llm=llm)
+            title = generate_title(prompt)
             save_session(thread_id=st.session_state.thread_id, title=title)
             st.session_state._current_title = title
 

@@ -28,5 +28,6 @@ alembic>=1.13.0
 
 # UI
 streamlit>=1.38.0
+streamlit-keyup>=0.2.0
 plotly>=5.18.0
 pandas>=2.0.0

@@ -1,6 +1,7 @@
 import uuid
 
 import streamlit as st
+from st_keyup import st_keyup
 
 from src.agent.health import check_anthropic, check_gigachat, check_ollama, check_openai
 from src.schemas.enums import LLMProvider
@@ -57,10 +58,11 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
 def _render_chat_history_section() -> None:
     st.header("Chat History")
 
-    search_query = st.text_input(
-        "Search chats",
+    search_query = st_keyup(
+        "",
         placeholder="Search...",
-        label_visibility="collapsed",
+        key="_chat_search",
+        debounce=300,
     )
     sessions = list_sessions(query=search_query)
     if not sessions:

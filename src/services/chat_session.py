@@ -1,6 +1,3 @@
-from langchain_core.language_models import BaseChatModel
-
-from src.agent.prompts import TITLE_GENERATION_PROMPT
 from src.db import get_session
 from src.logging_config import get_logger
 from src.repositories.chat_session import ChatSessionRepository
@@ -8,15 +5,7 @@ from src.repositories.chat_session import ChatSessionRepository
 logger = get_logger("services.chat_session")
 
 
-def generate_title(message: str, llm: BaseChatModel | None = None) -> str:
-    if llm:
-        try:
-            response = llm.invoke(f"{TITLE_GENERATION_PROMPT}\n\n{message[:300]}")
-            title = response.content.strip().strip('"').strip("«»")
-            if title:
-                return title[:100]
-        except Exception as e:
-            logger.warning("LLM title generation failed, falling back to truncation: %s", e)
+def generate_title(message: str) -> str:
     return message[:60].strip() + ("..." if len(message) > 60 else "")
 
 

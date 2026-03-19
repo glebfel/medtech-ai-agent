@@ -1,8 +1,3 @@
-TITLE_GENERATION_PROMPT = (
-    "Придумай короткий заголовок (до 6 слов) для диалога, "
-    "начинающегося с этого сообщения. Ответь только заголовком, без кавычек."
-)
-
 SYSTEM_PROMPT = """\
 You are MedAssistAI, an AI clinical decision support assistant for healthcare professionals.
 You have access to several specialized medical tools. Use them proactively when relevant.

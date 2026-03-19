@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import cast, func, or_, select, String
 from sqlalchemy.orm import Session
 
 from src.models.chat_session import ChatSessionEntity
@@ -28,8 +28,13 @@ class ChatSessionRepository:
     def list_recent(self, limit: int = 50, query: str = "") -> list[ChatSessionEntity]:
         stmt = select(ChatSessionEntity)
         if query:
+            q = query.strip()
+            title_varchar = cast(ChatSessionEntity.title, String)
             stmt = stmt.where(
-                func.lower(ChatSessionEntity.title).op("%%")(func.lower(query.strip()))
+                or_(
+                    ChatSessionEntity.title.ilike(f"%{q}%"),
+                    func.word_similarity(func.lower(q), func.lower(title_varchar)) > 0.3,
+                )
             )
         stmt = stmt.order_by(ChatSessionEntity.updated_at.desc()).limit(limit)
         return list(self._session.execute(stmt).scalars().all())
