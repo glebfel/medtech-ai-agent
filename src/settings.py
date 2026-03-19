@@ -46,6 +46,7 @@ class Settings(BaseSettings):
 
     # Input limits
     max_input_length: int = 5000
+    max_history_messages: int = 40
 
     # Database
     db_host: str = "localhost"
