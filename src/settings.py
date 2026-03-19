@@ -44,17 +44,6 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.1"
     ollama_base_url: str = "http://localhost:11434"
 
-    def is_provider_available(self, provider: "LLMProvider") -> bool:
-        if provider == LLMProvider.OPENAI:
-            return bool(self.openai_api_key.get_secret_value())
-        if provider == LLMProvider.ANTHROPIC:
-            return bool(self.anthropic_api_key.get_secret_value())
-        if provider == LLMProvider.GIGACHAT:
-            return bool(self.gigachat_credentials)
-        if provider == LLMProvider.OLLAMA:
-            return True
-        return False
-
     # Database
     db_host: str = "localhost"
     db_port: int = 5432

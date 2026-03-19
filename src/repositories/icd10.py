@@ -26,7 +26,3 @@ class ICD10Repository:
             {"code": r.code, "description": r.description, "sim": r.sim}
             for r in rows
         ]
-
-    def count(self) -> int:
-        result = self._session.execute(text("SELECT COUNT(*) FROM icd10_codes"))
-        return result.scalar_one()

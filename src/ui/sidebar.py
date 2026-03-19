@@ -4,7 +4,7 @@ import streamlit as st
 
 from src.agent.health import check_anthropic, check_gigachat, check_ollama, check_openai
 from src.schemas.enums import LLMProvider
-from src.services.chat_session import delete_session, list_sessions, rename_session
+from src.services.chat_session import delete_session, list_sessions
 from src.settings import Settings
 from src.ui.constants import EXAMPLES, PROVIDER_MODELS, TOOL_LABELS
 
