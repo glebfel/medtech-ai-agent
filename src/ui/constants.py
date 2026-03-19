@@ -1,6 +1,6 @@
 PROVIDER_MODELS: dict[str, list[str]] = {
     "openai": ["gpt-5.4-mini", "gpt-5.4", "gpt-5.2"],
-    "anthropic": ["claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"],
+    "anthropic": ["claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6"],
     "gigachat": ["GigaChat-2", "GigaChat-2-Pro", "GigaChat-2-Max"],
     "ollama": ["llama3.1", "deepseek-r1", "qwen3", "phi4", "gemma2"],
 }
