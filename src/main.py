@@ -51,7 +51,11 @@ def main() -> None:
     agent = st.session_state.agent
 
     st.title("MedAssistAI")
-    st.caption("AI Clinical Decision Support Assistant")
+    st.markdown(
+        "<p style='font-size:1.1rem; color:gray; margin-top:-10px;'>"
+        "AI Clinical Decision Support Assistant</p>",
+        unsafe_allow_html=True,
+    )
 
     render_title_editor()
     render_chat_history()
