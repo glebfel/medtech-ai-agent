@@ -66,27 +66,37 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
 
 def _render_ollama_model_selector(base_url: str) -> str:
     installed = list_ollama_models(base_url)
+    installed_names = [m["name"] for m in installed]
+
     if installed:
-        model_name = st.selectbox("Model", installed, index=0)
+        model_name = st.selectbox(
+            "Model",
+            installed_names,
+            index=0,
+            format_func=lambda n: next(
+                (f"{m['name']} ({m['params']}, {m['size_gb']} GB)" for m in installed if m["name"] == n),
+                n,
+            ),
+        )
     else:
         st.caption("No models installed")
         model_name = ""
 
+    available_to_pull = [m for m in PROVIDER_MODELS["ollama"] if m not in installed_names]
     with st.expander("Pull new model"):
-        new_model = st.text_input(
-            "Model name",
-            placeholder="e.g. llama3.1, phi4, gemma2",
-            label_visibility="collapsed",
-        )
-        if st.button("Pull", use_container_width=True) and new_model:
-            with st.spinner(f"Pulling {new_model}..."):
-                success, err = pull_ollama_model(base_url, model_name=new_model)
-            if success:
-                st.success(f"{new_model} installed")
-                list_ollama_models.clear()
-                st.rerun()
-            else:
-                st.error(err)
+        if available_to_pull:
+            selected = st.selectbox("Select model", available_to_pull, key="_ollama_pull_select")
+            if st.button("Pull", key="_ollama_pull_btn", use_container_width=True):
+                with st.spinner(f"Pulling {selected}..."):
+                    success, err = pull_ollama_model(base_url, model_name=selected)
+                if success:
+                    st.success(f"{selected} installed")
+                    list_ollama_models.clear()
+                    st.rerun()
+                else:
+                    st.error(err)
+        else:
+            st.caption("All popular models installed")
 
     return model_name
 

@@ -51,11 +51,18 @@ def check_ollama(base_url: str, timeout: int = 5) -> tuple[bool, str]:
 
 
 @st.cache_data(ttl=30, show_spinner=False)
-def list_ollama_models(base_url: str, timeout: int = 5) -> list[str]:
+def list_ollama_models(base_url: str, timeout: int = 5) -> list[dict]:
     try:
         client = OllamaClient(host=base_url, timeout=timeout)
         response = client.list()
-        return [m.model.split(":")[0] for m in response.models]
+        return [
+            {
+                "name": m.model.split(":")[0],
+                "size_gb": round(m.size / 1_073_741_824, 1),
+                "params": m.details.parameter_size if m.details else "",
+            }
+            for m in response.models
+        ]
     except Exception:
         return []
 
