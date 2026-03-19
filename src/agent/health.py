@@ -1,8 +1,12 @@
+import logging
+
 import streamlit as st
 from anthropic import Anthropic
 from gigachat import GigaChat
 from ollama import Client as OllamaClient
 from openai import OpenAI
+
+logger = logging.getLogger("health")
 
 
 @st.cache_data(ttl=300, show_spinner=False)
@@ -12,6 +16,7 @@ def check_openai(api_key: str, timeout: int = 5) -> tuple[bool, str]:
         client.models.list()
         return True, ""
     except Exception as e:
+        logger.error("OpenAI health check failed: %s", e)
         return False, _short_error(e)
 
 
@@ -22,6 +27,7 @@ def check_anthropic(api_key: str, timeout: int = 5) -> tuple[bool, str]:
         client.models.list()
         return True, ""
     except Exception as e:
+        logger.error("Anthropic health check failed: %s", e)
         return False, _short_error(e)
 
 
@@ -37,6 +43,7 @@ def check_gigachat(credentials: str, scope: str, verify_ssl: bool, timeout: int 
         client.get_models()
         return True, ""
     except Exception as e:
+        logger.error("GigaChat health check failed: %s", e)
         return False, _short_error(e)
 
 
@@ -47,6 +54,7 @@ def check_ollama(base_url: str, timeout: int = 5) -> tuple[bool, str]:
         client.list()
         return True, ""
     except Exception as e:
+        logger.error("Ollama health check failed: %s", e)
         return False, _short_error(e)
 
 
@@ -118,8 +126,10 @@ def pull_ollama_model(base_url: str, model_name: str) -> tuple[bool, str]:
     try:
         client = OllamaClient(host=base_url)
         client.pull(model_name)
+        logger.info("Ollama model pulled: %s", model_name)
         return True, ""
     except Exception as e:
+        logger.error("Ollama pull failed: model=%s, error=%s", model_name, e)
         return False, _short_error(e)
 
 
