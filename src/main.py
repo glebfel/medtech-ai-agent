@@ -48,8 +48,7 @@ def _init_infrastructure():
     with get_session() as session:
         seed_if_empty(session, settings.data_dir)
 
-    checkpointer = create_checkpointer(settings.database_url).__enter__()
-    checkpointer.setup()
+    checkpointer = create_checkpointer(settings.database_url)
 
     logger.info("Infrastructure initialized, LLM provider=%s", settings.llm_provider.value)
     return checkpointer, settings

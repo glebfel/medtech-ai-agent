@@ -10,7 +10,7 @@ langchain-gigachat>=0.3
 langchain-community>=0.3,<1
 
 # Web search
-duckduckgo-search>=6.0.0
+ddgs>=6.0.0
 
 # Config
 python-dotenv>=1.0.0

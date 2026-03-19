@@ -12,6 +12,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN useradd --create-home appuser
 USER appuser
 
+ENV PYTHONPATH=/app
+
 COPY --chown=appuser:appuser . .
 
 EXPOSE 8501

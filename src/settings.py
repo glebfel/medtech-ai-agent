@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     # Anthropic (Claude)
     anthropic_api_key: SecretStr = SecretStr("")
-    anthropic_model: str = "claude-sonnet-4-6-20250620"
+    anthropic_model: str = "claude-sonnet-4-6"
 
     # GigaChat
     gigachat_credentials: SecretStr = SecretStr("")
