@@ -18,20 +18,42 @@ class Settings(BaseSettings):
 
     # OpenAI
     openai_api_key: SecretStr = SecretStr("")
-    openai_model: str = "gpt-4o-mini"
+    openai_model: str = "gpt-5.4-mini"
 
     # Anthropic (Claude)
     anthropic_api_key: SecretStr = SecretStr("")
     anthropic_model: str = "claude-sonnet-4-6"
 
     # GigaChat
-    gigachat_credentials: SecretStr = SecretStr("")
+    gigachat_client_id: SecretStr = SecretStr("")
+    gigachat_client_secret: SecretStr = SecretStr("")
     gigachat_scope: str = "GIGACHAT_API_PERS"
     gigachat_verify_ssl: bool = False
+
+    @computed_field
+    @property
+    def gigachat_credentials(self) -> str:
+        cid = self.gigachat_client_id.get_secret_value()
+        secret = self.gigachat_client_secret.get_secret_value()
+        if not cid or not secret:
+            return ""
+        import base64
+        return base64.b64encode(f"{cid}:{secret}".encode()).decode()
 
     # Ollama
     ollama_model: str = "llama3.1"
     ollama_base_url: str = "http://localhost:11434"
+
+    def is_provider_available(self, provider: "LLMProvider") -> bool:
+        if provider == LLMProvider.OPENAI:
+            return bool(self.openai_api_key.get_secret_value())
+        if provider == LLMProvider.ANTHROPIC:
+            return bool(self.anthropic_api_key.get_secret_value())
+        if provider == LLMProvider.GIGACHAT:
+            return bool(self.gigachat_credentials)
+        if provider == LLMProvider.OLLAMA:
+            return True
+        return False
 
     # Database
     db_host: str = "localhost"

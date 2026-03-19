@@ -45,4 +45,4 @@ class DosageService:
                 adult_note=entity.adult_note,
                 geriatric_note=entity.geriatric_note,
             )
-            return info.calculate(weight_kg, age_years)
+            return info.calculate(weight_kg=weight_kg, age_years=age_years)

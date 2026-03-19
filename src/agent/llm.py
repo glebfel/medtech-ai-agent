@@ -8,35 +8,35 @@ from src.schemas.enums import LLMProvider
 from src.settings import Settings
 
 
-def create_llm(settings: Settings, temperature: float = 0.1) -> BaseChatModel:
+def create_llm(settings: Settings, temperature: float = 0.1, model_name: str = "") -> BaseChatModel:
     provider = settings.llm_provider
 
     if provider == LLMProvider.OPENAI:
         return ChatOpenAI(
-            model=settings.openai_model,
+            model=model_name or settings.openai_model,
             api_key=settings.openai_api_key,
             temperature=temperature,
         )
 
     if provider == LLMProvider.ANTHROPIC:
         return ChatAnthropic(
-            model=settings.anthropic_model,
+            model=model_name or settings.anthropic_model,
             api_key=settings.anthropic_api_key,
             temperature=temperature,
         )
 
     if provider == LLMProvider.GIGACHAT:
         return GigaChat(
-            credentials=settings.gigachat_credentials.get_secret_value(),
+            credentials=settings.gigachat_credentials,
             scope=settings.gigachat_scope,
-            model="GigaChat",
+            model=model_name or "GigaChat-2",
             verify_ssl_certs=settings.gigachat_verify_ssl,
             temperature=temperature,
         )
 
     if provider == LLMProvider.OLLAMA:
         return ChatOllama(
-            model=settings.ollama_model,
+            model=model_name or settings.ollama_model,
             base_url=settings.ollama_base_url,
             temperature=temperature,
         )

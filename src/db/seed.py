@@ -15,10 +15,10 @@ logger = get_logger("db.seed")
 
 def seed_if_empty(session: Session, data_dir: str = "data") -> None:
     """Seed all reference tables from JSON files if they are empty."""
-    _seed_table(session, data_dir, "drug_interactions.json", DrugInteractionEntity, _map_drug_interaction)
-    _seed_table(session, data_dir, "icd10_codes.json", ICD10CodeEntity, _map_icd10)
-    _seed_table(session, data_dir, "med_terms.json", MedTermEntity, _map_med_term)
-    _seed_table(session, data_dir, "dosages.json", DosageInfoEntity, _map_dosage)
+    _seed_table(session, data_dir=data_dir, filename="drug_interactions.json", entity_cls=DrugInteractionEntity, mapper=_map_drug_interaction)
+    _seed_table(session, data_dir=data_dir, filename="icd10_codes.json", entity_cls=ICD10CodeEntity, mapper=_map_icd10)
+    _seed_table(session, data_dir=data_dir, filename="med_terms.json", entity_cls=MedTermEntity, mapper=_map_med_term)
+    _seed_table(session, data_dir=data_dir, filename="dosages.json", entity_cls=DosageInfoEntity, mapper=_map_dosage)
 
 
 def _seed_table(session, data_dir, filename, entity_cls, mapper) -> None:

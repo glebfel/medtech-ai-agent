@@ -20,8 +20,8 @@ logger = get_logger("main")
 
 def _run_migrations(database_url: str) -> None:
     alembic_cfg = Config("alembic.ini")
-    alembic_cfg.set_main_option("sqlalchemy.url", database_url)
-    command.upgrade(alembic_cfg, "head")
+    alembic_cfg.set_main_option(name="sqlalchemy.url", value=database_url)
+    command.upgrade(alembic_cfg, revision="head")
     logger.info("Database migrations applied")
 
 
@@ -46,7 +46,7 @@ def _init_infrastructure():
         max_overflow=settings.db_max_overflow,
     )
     with get_session() as session:
-        seed_if_empty(session, settings.data_dir)
+        seed_if_empty(session, data_dir=settings.data_dir)
 
     checkpointer = create_checkpointer(settings.database_url)
 
@@ -66,18 +66,22 @@ def main() -> None:
     if "tool_usage" not in st.session_state:
         st.session_state.tool_usage = {}
 
-    provider, temperature = render_sidebar(settings)
+    provider, model_name, temperature = render_sidebar(settings)
 
     needs_rebuild = (
         "agent" not in st.session_state
         or st.session_state.get("_temperature") != temperature
         or st.session_state.get("_provider") != provider
+        or st.session_state.get("_model") != model_name
     )
     if needs_rebuild:
         settings_override = settings.model_copy(update={"llm_provider": provider})
-        st.session_state.agent = build_agent(settings_override, checkpointer, temperature)
+        st.session_state.agent = build_agent(
+            settings_override, checkpointer=checkpointer, temperature=temperature, model_name=model_name,
+        )
         st.session_state._temperature = temperature
         st.session_state._provider = provider
+        st.session_state._model = model_name
 
     agent = st.session_state.agent
 
