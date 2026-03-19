@@ -17,7 +17,7 @@ from src.agent.health import (
 from src.schemas.enums import LLMProvider
 from src.services.chat_session import ChatSessionService
 from src.settings import Settings, get_settings
-from src.ui.constants import EXAMPLES, OLLAMA_MODEL_INFO, PROVIDER_MODELS, TOOL_LABELS
+from src.ui.constants import OLLAMA_MODEL_INFO, PROVIDER_MODELS
 
 
 _NO_KEY_ERRORS = {"API-ключ не задан", "Client ID / Secret не заданы"}
@@ -230,7 +230,49 @@ def _render_chat_history_section() -> None:
                     _confirm_delete(thread_id=tid, title=s["title"])
 
 
-def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
+def _render_user_memory_section(store) -> None:
+    st.header("Patient Memory")
+    user_id = st.session_state.get("_user_id", "default")
+
+    try:
+        items = store.search(("user_memory", user_id))
+    except Exception:
+        items = []
+
+    if not items:
+        st.caption("No saved patient data")
+        return
+
+    for item in items:
+        val = item.value
+        if isinstance(val, dict):
+            content = val.get("content", {})
+            if isinstance(content, dict):
+                text = content.get("content", str(val))
+            elif isinstance(content, str):
+                text = content
+            elif "data" in val:
+                text = f"{item.key}: {val['data']}"
+            else:
+                text = str(val)
+        else:
+            text = str(val)
+
+        col_fact, col_del = st.columns([5, 1], vertical_alignment="center")
+        with col_fact:
+            st.caption(text)
+        with col_del:
+            if st.button("\u2715", key=f"mem_del_{item.key}"):
+                store.delete(("user_memory", user_id), key=item.key)
+                st.rerun()
+
+    if st.button("Clear all memory", use_container_width=True):
+        for item in items:
+            store.delete(("user_memory", user_id), key=item.key)
+        st.rerun()
+
+
+def render_sidebar(settings: Settings, store=None) -> tuple[LLMProvider, str, float]:
     with st.sidebar:
         st.header("Settings")
 
@@ -270,19 +312,8 @@ def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
         st.divider()
         _render_chat_history_section()
 
-        st.divider()
-        st.header("Statistics")
-        if st.session_state.tool_usage:
-            for tool_id, count in sorted(st.session_state.tool_usage.items()):
-                st.metric(TOOL_LABELS.get(tool_id, tool_id), count)
-        else:
-            st.caption("No tool calls yet")
-
-        st.divider()
-        st.header("Examples")
-        for ex in EXAMPLES:
-            if st.button(ex, use_container_width=True):
-                st.session_state.pending_example = ex
-                st.rerun()
+        if store is not None:
+            st.divider()
+            _render_user_memory_section(store)
 
     return selected_provider, model_name, temperature

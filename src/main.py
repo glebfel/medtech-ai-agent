@@ -8,6 +8,7 @@ from src.logging_config import get_logger
 from src.services.chat_session import ChatSessionService
 from src.services.infrastructure import init_infrastructure
 from src.ui.chat import process_response, render_chat_history, render_title_editor
+from src.ui.constants import EXAMPLES
 from src.ui.sidebar import render_sidebar
 from src.ui.user_id import get_user_id
 
@@ -29,16 +30,13 @@ def main() -> None:
         st.session_state.messages = []
     if "thread_id" not in st.session_state:
         st.session_state.thread_id = str(uuid.uuid4())
-    if "tool_usage" not in st.session_state:
-        st.session_state.tool_usage = {}
-
     if st.session_state.pop("_load_from_history", False):
         st.session_state.messages = ChatSessionService.restore_messages(
             checkpointer,
             thread_id=st.session_state.thread_id,
         )
 
-    provider, model_name, temperature = render_sidebar(settings)
+    provider, model_name, temperature = render_sidebar(settings, store=store)
     active_settings = settings.model_copy(update={"default_llm_provider": provider})
 
     needs_rebuild = (
@@ -76,6 +74,21 @@ def main() -> None:
 
     render_title_editor()
     render_chat_history()
+
+    # Show example prompts when chat is empty (like Gemini/ChatGPT)
+    if not st.session_state.messages:
+        for _ in range(8):
+            st.write("")
+        st.markdown(
+            "<h3 style='text-align:center; color:gray; font-weight:400;'>Try one of these examples</h3>",
+            unsafe_allow_html=True,
+        )
+        cols = st.columns(2)
+        for i, ex in enumerate(EXAMPLES):
+            with cols[i % 2]:
+                if st.button(ex, key=f"example_{i}", use_container_width=True):
+                    st.session_state.pending_example = ex
+                    st.rerun()
 
     pending = st.session_state.pop("pending_example", None)
     user_input = st.chat_input("Ask a medical question...")

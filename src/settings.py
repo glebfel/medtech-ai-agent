@@ -52,6 +52,10 @@ class Settings(BaseSettings):
     # User identification
     user_storage_key: str = "medassist_user_id"
 
+    # Memory TTL
+    memory_ttl_days: int = 90
+    memory_sweep_interval_minutes: int = 60
+
     # Input limits
     max_input_length: int = 5000
     max_history_messages: int = 40

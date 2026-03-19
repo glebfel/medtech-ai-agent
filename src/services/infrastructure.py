@@ -68,7 +68,15 @@ def init_infrastructure():
     checkpointer = create_checkpointer(settings.database_url)
 
     store_conn = psycopg.connect(settings.database_url, autocommit=True)
-    store = PostgresStore(store_conn)
+    ttl_config = None
+    if settings.memory_ttl_days > 0:
+        ttl_seconds = settings.memory_ttl_days * 86400
+        ttl_config = {
+            "default_ttl": ttl_seconds,
+            "refresh_on_read": True,
+            "sweep_interval_minutes": settings.memory_sweep_interval_minutes,
+        }
+    store = PostgresStore(store_conn, ttl=ttl_config)
     store.setup()
 
     logger.info(

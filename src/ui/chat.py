@@ -59,9 +59,6 @@ def process_response(result: dict) -> dict:
 
         tool_name = msg.name
         tools_used.append(tool_name)
-        st.session_state.tool_usage[tool_name] = (
-            st.session_state.tool_usage.get(tool_name, 0) + 1
-        )
 
         if tool_name == "bmi_calculator":
             bmi_value = parse_bmi(msg.content)
