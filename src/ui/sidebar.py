@@ -11,14 +11,22 @@ from src.ui.constants import EXAMPLES, PROVIDER_MODELS, TOOL_LABELS
 
 _NO_KEY_ERRORS = {"API-ключ не задан", "Client ID / Secret не заданы"}
 
+_PROVIDER_DISPLAY_NAMES: dict[LLMProvider, str] = {
+    LLMProvider.OPENAI: "OpenAI",
+    LLMProvider.ANTHROPIC: "Anthropic",
+    LLMProvider.GIGACHAT: "GigaChat",
+    LLMProvider.OLLAMA: "Ollama",
+}
+
 
 def _provider_label(status: tuple[bool, str], provider: LLMProvider) -> str:
+    name = _PROVIDER_DISPLAY_NAMES.get(provider, provider.value)
     ok, err = status
     if ok:
-        return f"\u2705 {provider.value} — connected"
+        return f"{name} \u2705"
     if err in _NO_KEY_ERRORS:
-        return f"\u2b1c {provider.value} — no key"
-    return f"\u274c {provider.value} — error"
+        return f"{name} \u2b1c"
+    return f"{name} \u274c"
 
 
 def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, str]:
