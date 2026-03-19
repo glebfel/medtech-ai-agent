@@ -134,6 +134,37 @@ def _render_ollama_model_selector(base_url: str) -> str:
     return model_name
 
 
+@st.dialog("Delete chat?")
+def _confirm_delete(thread_id: str, title: str) -> None:
+    st.markdown(f"This will delete **{title}**.")
+    col_cancel, col_delete = st.columns(2)
+    with col_cancel:
+        if st.button("Cancel", use_container_width=True):
+            st.rerun()
+    with col_delete:
+        if st.button("Delete", type="primary", use_container_width=True):
+            ChatSessionService.delete(thread_id)
+            if st.session_state.get("thread_id") == thread_id:
+                st.session_state.thread_id = str(uuid.uuid4())
+                st.session_state.messages = []
+            st.rerun()
+
+
+@st.dialog("Rename chat")
+def _rename_dialog(thread_id: str, title: str) -> None:
+    new_title = st.text_input("New title", value=title)
+    col_cancel, col_save = st.columns(2)
+    with col_cancel:
+        if st.button("Cancel", use_container_width=True):
+            st.rerun()
+    with col_save:
+        if st.button("Save", type="primary", use_container_width=True) and new_title.strip():
+            ChatSessionService.rename(thread_id=thread_id, title=new_title.strip())
+            if st.session_state.get("_current_title") and st.session_state.get("thread_id") == thread_id:
+                st.session_state._current_title = new_title.strip()
+            st.rerun()
+
+
 def _render_chat_history_section() -> None:
     from src.settings import get_settings
     limit = get_settings().max_visible_chats
@@ -154,21 +185,21 @@ def _render_chat_history_section() -> None:
         return
 
     for s in sessions:
-        col_title, col_del = st.columns([5, 1], vertical_alignment="center")
+        tid = s["thread_id"]
+        col_title, col_menu = st.columns([5, 1], vertical_alignment="center")
         with col_title:
-            if st.button(s["title"], key=f"sess_{s['thread_id']}", use_container_width=True):
-                st.session_state.thread_id = s["thread_id"]
+            if st.button(s["title"], key=f"sess_{tid}", use_container_width=True):
+                st.session_state.thread_id = tid
                 st.session_state.messages = []
                 st.session_state.pop("agent", None)
                 st.session_state._load_from_history = True
                 st.rerun()
-        with col_del:
-            if st.button("\U0001f5d1", key=f"del_{s['thread_id']}"):
-                ChatSessionService.delete(s["thread_id"])
-                if st.session_state.get("thread_id") == s["thread_id"]:
-                    st.session_state.thread_id = str(uuid.uuid4())
-                    st.session_state.messages = []
-                st.rerun()
+        with col_menu:
+            with st.popover("\u22ee", use_container_width=True):
+                if st.button("\u270f\ufe0f Rename", key=f"ren_{tid}", use_container_width=True):
+                    _rename_dialog(thread_id=tid, title=s["title"])
+                if st.button("\U0001f5d1 Delete", key=f"del_{tid}", use_container_width=True):
+                    _confirm_delete(thread_id=tid, title=s["title"])
 
 
 def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
