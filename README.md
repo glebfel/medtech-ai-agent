@@ -1,4 +1,4 @@
-# MedAssist — AI-агент клинической поддержки
+# MedAssistAI — AI-агент клинической поддержки
 
 LLM-агент для медицинских работников на базе LangGraph, LangChain, Streamlit и PostgreSQL.
 
@@ -7,6 +7,8 @@ LLM-агент для медицинских работников на базе 
 
 - **6 инструментов:** проверка взаимодействий лекарств, расчёт ИМТ, поиск МКБ-10, расчёт дозировок, словарь мед. терминов, веб-поиск
 - **Мульти-LLM:** OpenAI, Anthropic (Claude), GigaChat, Ollama (локальные модели)
+- **Выбор модели в UI:** переключение провайдера и модели прямо в sidebar с индикацией статуса подключения
+- **История чатов:** сохранение, поиск, переименование и удаление диалогов
 - **Персистентная память:** состояние диалога хранится в PostgreSQL через LangGraph checkpointer
 - **Веб-интерфейс:** Streamlit с sidebar настройками, gauge-диаграмма ИМТ, таблица результатов МКБ-10, статистика вызовов
 - **Справочные данные в PostgreSQL:** взаимодействия лекарств, коды МКБ-10, мед. термины, дозировки — сидируются из JSON при первом запуске
@@ -24,9 +26,9 @@ src/
 ├── models/              # SQLAlchemy ORM-сущности
 ├── db/                  # Engine, сессии, сидирование
 ├── repositories/        # Слой доступа к данным (SQL-запросы)
-├── services/            # Бизнес-логика
+├── services/            # Бизнес-логика (инфраструктура, сессии чатов)
 ├── tools/               # LangChain @tool обёртки (6 инструментов)
-├── agent/               # LangGraph агент, фабрика LLM, промпты
+├── agent/               # LangGraph агент, фабрика LLM, промпты, health checks
 └── ui/                  # Streamlit-компоненты (чат, sidebar, графики)
 ```
 
@@ -34,56 +36,65 @@ src/
 
 ## Быстрый старт
 
-### 1. Предварительные требования
-
-- Python 3.11+
-- Docker (для PostgreSQL)
-
-### 2. Запуск PostgreSQL
-
-```bash
-docker compose up -d postgres
-```
-
-### 3. Установка зависимостей
-
-```bash
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 4. Конфигурация
+### Docker (рекомендуется)
 
 ```bash
 cp .env.example .env
+# заполнить ключи LLM в .env
+docker compose up --build
 ```
 
-Отредактировать `.env` — указать ключи LLM-провайдера:
+Открыть http://localhost:8501
+
+### Скрипт быстрого запуска
+
+```bash
+./scripts/start.sh
+```
+
+Скрипт автоматически:
+- проверит наличие Docker
+- создаст `.env` из `.env.example` если нет
+- соберёт и запустит контейнеры
+- покажет URL приложения
+
+### Ручной запуск (без Docker для приложения)
+
+```bash
+# 1. PostgreSQL
+docker compose up -d postgres
+
+# 2. Зависимости
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Конфигурация
+cp .env.example .env
+# отредактировать .env
+
+# 4. Запуск
+streamlit run src/main.py
+```
+
+## Подключение LLM-провайдеров
+
+### OpenAI / Anthropic / GigaChat
+
+Указать ключи в `.env`:
 
 | Переменная | Когда нужна |
 |---|---|
 | `OPENAI_API_KEY` | `LLM_PROVIDER=openai` |
 | `ANTHROPIC_API_KEY` | `LLM_PROVIDER=anthropic` |
-| `GIGACHAT_CREDENTIALS` | `LLM_PROVIDER=gigachat` |
-| Запущенный Ollama | `LLM_PROVIDER=ollama` |
+| `GIGACHAT_CLIENT_ID` + `GIGACHAT_CLIENT_SECRET` | `LLM_PROVIDER=gigachat` |
 
-### 5. Запуск
+### Ollama (локальные модели)
 
-```bash
-streamlit run src/main.py
-```
+Ollama поднимается автоматически как Docker-сервис вместе с приложением. API-ключи не нужны.
 
-Открыть http://localhost:8501
+Скачивание и выбор моделей — прямо из UI: выбрать провайдер Ollama в sidebar, раскрыть "Pull new model", ввести имя модели и нажать Pull.
 
-### Docker (полный стек)
-
-```bash
-cp .env.example .env
-# заполнить ключи LLM
-docker compose up --build
-```
-
-Открыть http://localhost:8501
+Популярные модели: `llama3.1`, `deepseek-r1`, `qwen3`, `phi4`, `gemma2`.
 
 ## Справочник конфигурации
 
@@ -91,13 +102,16 @@ docker compose up --build
 |---|---|---|
 | `LLM_PROVIDER` | `openai` | LLM-бэкенд: `openai`, `anthropic`, `gigachat`, `ollama` |
 | `OPENAI_API_KEY` | | Ключ OpenAI API |
-| `OPENAI_MODEL` | `gpt-4o-mini` | Модель OpenAI |
+| `OPENAI_MODEL` | `gpt-5.4-mini` | Модель OpenAI |
 | `ANTHROPIC_API_KEY` | | Ключ Anthropic API |
-| `ANTHROPIC_MODEL` | `claude-sonnet-4-6-20250620` | Модель Claude |
-| `GIGACHAT_CREDENTIALS` | | Креды GigaChat |
+| `ANTHROPIC_MODEL` | `claude-haiku-4-5` | Модель Claude |
+| `GIGACHAT_CLIENT_ID` | | Client ID GigaChat |
+| `GIGACHAT_CLIENT_SECRET` | | Client Secret GigaChat |
+| `GIGACHAT_SCOPE` | `GIGACHAT_API_PERS` | Scope GigaChat API |
 | `GIGACHAT_VERIFY_SSL` | `false` | Проверка SSL для GigaChat |
 | `OLLAMA_MODEL` | `llama3.1` | Модель Ollama |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | URL сервера Ollama |
+| `OLLAMA_BASE_URL` | `http://ollama:11434` | URL сервера Ollama |
+| `HEALTH_CHECK_TIMEOUT` | `5` | Таймаут проверки подключения провайдеров (сек) |
 | `DB_HOST` | `localhost` | Хост PostgreSQL |
 | `DB_PORT` | `5432` | Порт PostgreSQL |
 | `DB_NAME` | `medassist` | Имя базы данных |
@@ -140,7 +154,7 @@ alembic upgrade head
 ## Стек технологий
 
 - **Агент:** LangGraph (ReAct-паттерн), LangChain
-- **LLM:** OpenAI / GigaChat / Ollama
+- **LLM:** OpenAI / Anthropic (Claude) / GigaChat / Ollama
 - **UI:** Streamlit + Plotly
 - **БД:** PostgreSQL 16 + SQLAlchemy 2.0 + Alembic
 - **Поиск:** pg_trgm (триграммное сходство), DuckDuckGo

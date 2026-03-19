@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     ollama_model: str = "llama3.1"
     ollama_base_url: str = "http://localhost:11434"
 
+    # Health check
+    health_check_timeout: int = 5
+
     # Database
     db_host: str = "localhost"
     db_port: int = 5432

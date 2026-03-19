@@ -3,7 +3,14 @@ import uuid
 import streamlit as st
 from st_keyup import st_keyup
 
-from src.agent.health import check_anthropic, check_gigachat, check_ollama, check_openai
+from src.agent.health import (
+    check_anthropic,
+    check_gigachat,
+    check_ollama,
+    check_openai,
+    list_ollama_models,
+    pull_ollama_model,
+)
 from src.schemas.enums import LLMProvider
 from src.services.chat_session import delete_session, list_sessions
 from src.settings import Settings
@@ -31,28 +38,57 @@ def _provider_label(status: tuple[bool, str], provider: LLMProvider) -> str:
 
 
 def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, str]:
+    timeout = settings.health_check_timeout
+
     if provider == LLMProvider.OPENAI:
         key = settings.openai_api_key.get_secret_value()
         if not key:
             return False, "API-ключ не задан"
-        return check_openai(key)
+        return check_openai(key, timeout=timeout)
 
     if provider == LLMProvider.ANTHROPIC:
         key = settings.anthropic_api_key.get_secret_value()
         if not key:
             return False, "API-ключ не задан"
-        return check_anthropic(key)
+        return check_anthropic(key, timeout=timeout)
 
     if provider == LLMProvider.GIGACHAT:
         creds = settings.gigachat_credentials
         if not creds:
             return False, "Client ID / Secret не заданы"
-        return check_gigachat(creds, scope=settings.gigachat_scope, verify_ssl=settings.gigachat_verify_ssl)
+        return check_gigachat(creds, scope=settings.gigachat_scope, verify_ssl=settings.gigachat_verify_ssl, timeout=timeout)
 
     if provider == LLMProvider.OLLAMA:
-        return check_ollama(settings.ollama_base_url)
+        return check_ollama(settings.ollama_base_url, timeout=timeout)
 
     return False, "Unknown provider"
+
+
+def _render_ollama_model_selector(base_url: str) -> str:
+    installed = list_ollama_models(base_url)
+    if installed:
+        model_name = st.selectbox("Model", installed, index=0)
+    else:
+        st.caption("No models installed")
+        model_name = ""
+
+    with st.expander("Pull new model"):
+        new_model = st.text_input(
+            "Model name",
+            placeholder="e.g. llama3.1, phi4, gemma2",
+            label_visibility="collapsed",
+        )
+        if st.button("Pull", use_container_width=True) and new_model:
+            with st.spinner(f"Pulling {new_model}..."):
+                success, err = pull_ollama_model(base_url, model_name=new_model)
+            if success:
+                st.success(f"{new_model} installed")
+                list_ollama_models.clear()
+                st.rerun()
+            else:
+                st.error(err)
+
+    return model_name
 
 
 def _render_chat_history_section() -> None:
@@ -108,8 +144,11 @@ def render_sidebar(settings: Settings) -> tuple[LLMProvider, str, float]:
         if not ok:
             st.warning(err)
 
-        models = PROVIDER_MODELS.get(selected_provider.value, [])
-        model_name = st.selectbox("Model", models, index=0) if models else ""
+        if selected_provider == LLMProvider.OLLAMA and ok:
+            model_name = _render_ollama_model_selector(settings.ollama_base_url)
+        else:
+            models = PROVIDER_MODELS.get(selected_provider.value, [])
+            model_name = st.selectbox("Model", models, index=0) if models else ""
 
         temperature = st.slider("Temperature", 0.0, 1.0, 0.1, 0.05)
 
