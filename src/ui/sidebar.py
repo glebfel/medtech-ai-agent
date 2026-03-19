@@ -23,10 +23,10 @@ def _provider_label(status: tuple[bool, str], provider: LLMProvider) -> str:
     name = _PROVIDER_DISPLAY_NAMES.get(provider, provider.value)
     ok, err = status
     if ok:
-        return f"{name} \u2705"
+        return f"{name} — connected \u2705"
     if err in _NO_KEY_ERRORS:
-        return f"{name} \u2b1c"
-    return f"{name} \u274c"
+        return f"{name} — no key \u2b1c"
+    return f"{name} — error \u274c"
 
 
 def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, str]:
