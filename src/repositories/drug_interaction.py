@@ -13,7 +13,7 @@ class DrugInteractionRepository:
     def find_by_drug_pair(
         self, drug_a: str, drug_b: str
     ) -> Optional[DrugInteractionEntity]:
-        a =f"%{drug_a.strip().lower()}%"
+        a = f"%{drug_a.strip().lower()}%"
         b = f"%{drug_b.strip().lower()}%"
 
         stmt = (
@@ -33,6 +33,3 @@ class DrugInteractionRepository:
             .limit(1)
         )
         return self._session.execute(stmt).scalar_one_or_none()
-
-    def count(self) -> int:
-        return self._session.query(DrugInteractionEntity).count()

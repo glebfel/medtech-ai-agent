@@ -51,18 +51,3 @@ def get_session() -> Generator[Session, None, None]:
         raise
     finally:
         session.close()
-
-
-def get_engine() -> Engine:
-    if _engine is None:
-        raise RuntimeError("Database not initialized. Call init_engine() first.")
-    return _engine
-
-
-def close_engine() -> None:
-    global _engine, _session_factory
-    if _engine is not None:
-        _engine.dispose()
-        _engine = None
-        _session_factory = None
-        logger.info("Database engine closed")
