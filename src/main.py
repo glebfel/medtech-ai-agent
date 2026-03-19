@@ -65,6 +65,13 @@ def main() -> None:
     prompt = pending or user_input
 
     if prompt:
+        prompt = prompt.strip()
+        if not prompt:
+            st.rerun()
+        if len(prompt) > settings.max_input_length:
+            st.warning(f"Message too long (max {settings.max_input_length} chars)")
+            st.rerun()
+
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -72,12 +79,17 @@ def main() -> None:
         config = {"configurable": {"thread_id": st.session_state.thread_id}}
 
         with st.chat_message("assistant"):
-            with st.spinner("Analyzing..."):
-                result = agent.invoke(
-                    {"messages": [{"role": "user", "content": prompt}]},
-                    config=config,
-                )
-            assistant_msg = process_response(result)
+            try:
+                with st.spinner("Analyzing..."):
+                    result = agent.invoke(
+                        {"messages": [{"role": "user", "content": prompt}]},
+                        config=config,
+                    )
+                assistant_msg = process_response(result)
+            except Exception as e:
+                err_msg = "An error occurred. Please try again or switch the model."
+                st.error(err_msg)
+                assistant_msg = {"role": "assistant", "content": err_msg}
 
         st.session_state.messages.append(assistant_msg)
 

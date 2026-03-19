@@ -133,4 +133,10 @@ def _short_error(e: Exception) -> str:
         return "Connection timeout"
     if "connect" in msg.lower():
         return "Connection failed"
-    return msg[:80]
+    if "not_found" in msg.lower() or "404" in msg:
+        return "Model not found"
+    # Sanitize: don't leak API keys or internal details
+    safe = msg.split("\n")[0][:80]
+    if "sk-" in safe or "key" in safe.lower():
+        return "Provider error"
+    return safe

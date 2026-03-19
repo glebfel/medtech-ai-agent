@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     # Health check
     health_check_timeout: int = 5
 
+    # Input limits
+    max_input_length: int = 5000
+
     # Database
     db_host: str = "localhost"
     db_port: int = 5432

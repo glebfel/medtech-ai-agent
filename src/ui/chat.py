@@ -19,7 +19,7 @@ def render_title_editor() -> None:
         key="_title_input",
         label_visibility="collapsed",
     )
-    if new_title != current_title:
+    if new_title != current_title and new_title.strip():
         st.session_state._current_title = new_title
         rename_session(thread_id=st.session_state.thread_id, title=new_title)
 
