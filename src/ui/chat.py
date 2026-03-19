@@ -2,9 +2,26 @@ import pandas as pd
 import streamlit as st
 from langchain_core.messages import ToolMessage
 
+from src.services.chat_session import rename_session
 from src.ui.charts import render_bmi_gauge
 from src.ui.constants import TOOL_LABELS
 from src.ui.parsers import parse_bmi, parse_icd10
+
+
+def render_title_editor() -> None:
+    current_title = st.session_state.get("_current_title", "")
+    if not current_title:
+        return
+
+    new_title = st.text_input(
+        "Chat title",
+        value=current_title,
+        key="_title_input",
+        label_visibility="collapsed",
+    )
+    if new_title != current_title:
+        st.session_state._current_title = new_title
+        rename_session(thread_id=st.session_state.thread_id, title=new_title)
 
 
 def render_chat_history() -> None:

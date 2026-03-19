@@ -53,3 +53,25 @@ def delete_session(thread_id: str) -> None:
     with get_session() as session:
         repo = ChatSessionRepository(session)
         repo.delete(thread_id)
+
+
+def restore_messages(checkpointer, thread_id: str) -> list[dict]:
+    try:
+        config = {"configurable": {"thread_id": thread_id}}
+        state = checkpointer.get(config)
+        if not state or "channel_values" not in state:
+            return []
+
+        messages = state["channel_values"].get("messages", [])
+        restored = []
+        for msg in messages:
+            if msg.type == "tool":
+                continue
+            role = "assistant" if msg.type == "ai" else "user"
+            content = msg.content if isinstance(msg.content, str) else str(msg.content)
+            if content:
+                restored.append({"role": role, "content": content})
+        return restored
+    except Exception as e:
+        logger.warning("Failed to restore messages from checkpointer: %s", e)
+        return []

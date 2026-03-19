@@ -15,10 +15,10 @@ _NO_KEY_ERRORS = {"API-ключ не задан", "Client ID / Secret не за�
 def _provider_label(status: tuple[bool, str], provider: LLMProvider) -> str:
     ok, err = status
     if ok:
-        return f"\U0001f7e2 {provider.value}"
+        return f"\u2705 {provider.value} — connected"
     if err in _NO_KEY_ERRORS:
-        return f"\u26aa {provider.value}"
-    return f"\U0001f534 {provider.value}"
+        return f"\u2b1c {provider.value} — no key"
+    return f"\u274c {provider.value} — error"
 
 
 def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, str]:
@@ -55,7 +55,7 @@ def _render_chat_history_section() -> None:
         return
 
     for s in sessions:
-        col_title, col_del = st.columns([5, 1])
+        col_title, col_del = st.columns([5, 1], vertical_alignment="center")
         with col_title:
             if st.button(s["title"], key=f"sess_{s['thread_id']}", use_container_width=True):
                 st.session_state.thread_id = s["thread_id"]
