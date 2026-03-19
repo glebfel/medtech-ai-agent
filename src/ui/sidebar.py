@@ -92,23 +92,25 @@ def _get_provider_models(settings: Settings, selected_provider: LLMProvider, ava
 
 def _render_ollama_model_selector(base_url: str) -> str:
     installed = list_ollama_models(base_url)
-    installed_names = [m["name"] for m in installed]
+    compatible = [m for m in installed if m["tools"]]
+    compatible_names = [m["name"] for m in compatible]
 
-    if installed:
+    if compatible:
         model_name = st.selectbox(
             "Model",
-            installed_names,
+            compatible_names,
             index=0,
             format_func=lambda n: next(
-                (f"{m['name']} ({m['params']}, {m['size_gb']} GB)" for m in installed if m["name"] == n),
+                (f"{m['name']} ({m['params']}, {m['size_gb']} GB)" for m in compatible if m["name"] == n),
                 n,
             ),
         )
     else:
-        st.caption("No models installed")
+        st.caption("No compatible models (need tool calling support)")
         model_name = ""
 
-    available_to_pull = [m for m in PROVIDER_MODELS["ollama"] if m not in installed_names]
+    all_installed_names = [m["name"] for m in installed]
+    available_to_pull = [m for m in PROVIDER_MODELS["ollama"] if m not in all_installed_names]
     with st.expander("Pull new model"):
         if available_to_pull:
             selected = st.selectbox(

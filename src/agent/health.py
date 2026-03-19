@@ -55,14 +55,21 @@ def list_ollama_models(base_url: str, timeout: int = 5) -> list[dict]:
     try:
         client = OllamaClient(host=base_url, timeout=timeout)
         response = client.list()
-        return [
-            {
+        results = []
+        for m in response.models:
+            try:
+                info = client.show(m.model)
+                template = getattr(info, "template", "") or ""
+                supports_tools = "tools" in template.lower()
+            except Exception:
+                supports_tools = False
+            results.append({
                 "name": m.model.split(":")[0],
                 "size_gb": round(m.size / 1_073_741_824, 1),
                 "params": m.details.parameter_size if m.details else "",
-            }
-            for m in response.models
-        ]
+                "tools": supports_tools,
+            })
+        return results
     except Exception:
         return []
 

@@ -2,12 +2,11 @@ PROVIDER_MODELS: dict[str, list[str]] = {
     "openai": ["gpt-5.4-mini", "gpt-5.4", "gpt-5.2"],
     "anthropic": ["claude-haiku-4-5", "claude-sonnet-4-6", "claude-opus-4-6"],
     "gigachat": ["GigaChat-2", "GigaChat-2-Pro", "GigaChat-2-Max"],
-    "ollama": ["llama3.1", "deepseek-r1", "qwen3", "phi4", "gemma2"],
+    "ollama": ["llama3.1", "qwen3", "phi4", "gemma2"],
 }
 
 OLLAMA_MODEL_INFO: dict[str, str] = {
     "llama3.1": "8B, ~4.7 GB",
-    "deepseek-r1": "7B, ~4.7 GB",
     "qwen3": "8B, ~4.9 GB",
     "phi4": "14B, ~8.4 GB",
     "gemma2": "9B, ~5.4 GB",
