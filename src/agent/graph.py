@@ -1,4 +1,4 @@
-from langchain_core.messages import HumanMessage
+from langchain_core.messages.utils import count_tokens_approximately, trim_messages
 from langmem import create_manage_memory_tool, create_search_memory_tool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.prebuilt import create_react_agent
@@ -6,23 +6,34 @@ from langgraph.store.base import BaseStore
 
 from src.agent.llm import create_llm
 from src.agent.prompts import SYSTEM_PROMPT
+from src.logging_config import get_logger
 from src.settings import Settings, get_settings
 from src.tools import all_tools
+
+logger = get_logger("agent.graph")
 
 _MEMORY_NAMESPACE = ("user_memory", "{langgraph_user_id}")
 
 
 def _trim_history(state: dict) -> dict:
-    max_messages = get_settings().max_history_messages
     messages = state.get("messages", [])
-    if len(messages) <= max_messages:
-        return {"llm_input_messages": messages}
 
-    trimmed = messages[-max_messages:]
-    for i, msg in enumerate(trimmed):
-        if isinstance(msg, HumanMessage):
-            trimmed = trimmed[i:]
-            break
+    trimmed = trim_messages(
+        messages,
+        max_tokens=get_settings().max_context_tokens,
+        token_counter=count_tokens_approximately,
+        strategy="last",
+        start_on="human",
+        include_system=True,
+        allow_partial=False,
+    )
+
+    if len(trimmed) < len(messages):
+        logger.info(
+            "Context trimmed: %d → %d messages",
+            len(messages),
+            len(trimmed),
+        )
 
     return {"llm_input_messages": trimmed}
 

@@ -58,8 +58,10 @@ class Settings(BaseSettings):
 
     # Input limits
     max_input_length: int = 5000
-    max_history_messages: int = 40
     max_visible_chats: int = 15
+
+    # Context window management
+    max_context_tokens: int = 32000
 
     # Database
     db_host: str = "localhost"
