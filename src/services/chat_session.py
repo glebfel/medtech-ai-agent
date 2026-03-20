@@ -63,10 +63,11 @@ class ChatSessionService:
             for msg in messages:
                 if msg.type == "tool":
                     continue
+                # Skip AI messages with tool_calls (no user-facing content)
+                if msg.type == "ai" and getattr(msg, "tool_calls", None):
+                    continue
                 role = "assistant" if msg.type == "ai" else "user"
-                content = (
-                    msg.content if isinstance(msg.content, str) else str(msg.content)
-                )
+                content = msg.content if isinstance(msg.content, str) else ""
                 if content:
                     restored.append({"role": role, "content": content})
             return restored
