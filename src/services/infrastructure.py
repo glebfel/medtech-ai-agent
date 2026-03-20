@@ -5,9 +5,11 @@ from alembic import command
 from alembic.config import Config
 from dotenv import load_dotenv
 from langgraph.store.postgres import PostgresStore
+from langgraph.store.postgres.base import PostgresIndexConfig
 from ollama import Client as OllamaClient
 
 from src.agent.memory import create_checkpointer
+from src.services.embeddings import get_embeddings
 from src.db import get_session, init_engine
 from src.db.seed import seed_if_empty
 from src.logging_config import get_logger, setup_logging
@@ -76,7 +78,11 @@ def init_infrastructure():
             "refresh_on_read": True,
             "sweep_interval_minutes": settings.memory_sweep_interval_minutes,
         }
-    store = PostgresStore(store_conn, ttl=ttl_config)
+    index_config = PostgresIndexConfig(
+        dims=settings.embedding_dim,
+        embed=get_embeddings(),
+    )
+    store = PostgresStore(store_conn, index=index_config, ttl=ttl_config)
     store.setup()
 
     logger.info(

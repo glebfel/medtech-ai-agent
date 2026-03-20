@@ -51,6 +51,7 @@ class Settings(BaseSettings):
 
     # User identification
     user_storage_key: str = "medassist_user_id"
+    user_cookie_max_age_days: int = 365
 
     # Memory TTL
     memory_ttl_days: int = 90

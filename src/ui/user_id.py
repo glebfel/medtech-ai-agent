@@ -7,27 +7,26 @@ from src.settings import get_settings
 
 
 def get_user_id() -> str:
-    """Get or create persistent user_id stored in browser localStorage."""
+    """Get or create persistent user_id stored in browser cookie."""
     if "_user_id" in st.session_state:
         return st.session_state._user_id
 
-    storage_key = get_settings().user_storage_key
+    settings = get_settings()
+    storage_key = settings.user_storage_key
 
-    # Try reading from browser localStorage
-    stored = streamlit_js_eval(
-        js_expressions=f"localStorage.getItem('{storage_key}')",
-        key="_read_user_id",
-    )
+    # Read from cookie (survives page refresh, unlike streamlit_js_eval)
+    user_id = st.context.cookies.get(storage_key)
 
-    if stored:
-        st.session_state._user_id = stored
-        return stored
+    if user_id:
+        st.session_state._user_id = user_id
+        return user_id
 
-    # First visit — generate and save
+    # New user — generate ID and set cookie via JS
     new_id = str(uuid.uuid4())
+    max_age = settings.user_cookie_max_age_days * 86400
     streamlit_js_eval(
-        js_expressions=f"localStorage.setItem('{storage_key}', '{new_id}')",
-        key="_write_user_id",
+        js_expressions=f"document.cookie = '{storage_key}={new_id}; path=/; max-age={max_age}; SameSite=Lax'",
+        key="_set_user_cookie",
     )
     st.session_state._user_id = new_id
     return new_id
