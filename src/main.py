@@ -75,10 +75,12 @@ def main() -> None:
     render_title_editor()
     render_chat_history()
 
-    # Show example prompts when chat is empty (like Gemini/ChatGPT)
-    if not st.session_state.messages:
-        for _ in range(8):
-            st.write("")
+    pending = st.session_state.pop("pending_example", None)
+    user_input = st.chat_input("Ask a medical question...")
+    prompt = pending or user_input
+
+    # Show example prompts only when chat is empty and no input
+    if not st.session_state.messages and not prompt:
         st.markdown(
             "<h3 style='text-align:center; color:gray; font-weight:400;'>Try one of these examples</h3>",
             unsafe_allow_html=True,
@@ -89,10 +91,6 @@ def main() -> None:
                 if st.button(ex, key=f"example_{i}", use_container_width=True):
                     st.session_state.pending_example = ex
                     st.rerun()
-
-    pending = st.session_state.pop("pending_example", None)
-    user_input = st.chat_input("Ask a medical question...")
-    prompt = pending or user_input
 
     if prompt:
         prompt = prompt.strip()
