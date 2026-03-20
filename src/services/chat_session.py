@@ -1,3 +1,5 @@
+from typing import Any
+
 from src.db import get_session
 from src.logging_config import get_logger
 from src.repositories.chat_session import ChatSessionRepository
@@ -51,7 +53,7 @@ class ChatSessionService:
             repo.delete(thread_id)
 
     @staticmethod
-    def restore_messages(checkpointer, thread_id: str) -> list[dict]:
+    def restore_messages(checkpointer: Any, thread_id: str) -> list[dict]:
         try:
             config = {"configurable": {"thread_id": thread_id}}
             state = checkpointer.get(config)

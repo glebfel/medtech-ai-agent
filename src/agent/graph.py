@@ -1,4 +1,5 @@
 from langchain_core.messages.utils import count_tokens_approximately, trim_messages
+from langgraph.graph.state import CompiledStateGraph
 from langmem import create_manage_memory_tool, create_search_memory_tool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.prebuilt import create_react_agent
@@ -44,7 +45,7 @@ def build_agent(
     store: BaseStore,
     temperature: float = 0.1,
     model_name: str = "",
-):
+) -> CompiledStateGraph:
     llm = create_llm(settings, temperature=temperature, model_name=model_name)
 
     memory_tools = [

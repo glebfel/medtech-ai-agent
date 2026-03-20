@@ -49,7 +49,7 @@ def _ensure_embedding_model(settings: Settings) -> None:
         logger.warning("Could not ensure embedding model: %s", e)
 
 
-def init_infrastructure():
+def init_infrastructure() -> tuple:
     load_dotenv()
     settings = get_settings()
 

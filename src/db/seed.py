@@ -1,5 +1,6 @@
 import json
 import os
+from collections.abc import Callable
 
 from sqlalchemy.orm import Session
 
@@ -47,7 +48,9 @@ def seed_if_empty(session: Session, data_dir: str = "data") -> None:
     _generate_embeddings_if_needed(session)
 
 
-def _seed_table(session, data_dir, filename, entity_cls, mapper) -> None:
+def _seed_table(
+    session: Session, data_dir: str, filename: str, entity_cls: type, mapper: Callable
+) -> None:
     if session.query(entity_cls).count() > 0:
         return
 

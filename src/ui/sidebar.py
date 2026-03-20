@@ -1,4 +1,5 @@
 import uuid
+from typing import Any
 
 import streamlit as st
 from st_keyup import st_keyup
@@ -230,7 +231,7 @@ def _render_chat_history_section() -> None:
                     _confirm_delete(thread_id=tid, title=s["title"])
 
 
-def _render_user_memory_section(store) -> None:
+def _render_user_memory_section(store: Any) -> None:
     st.header("Patient Memory")
     user_id = st.session_state.get("_user_id", "default")
 
@@ -272,7 +273,9 @@ def _render_user_memory_section(store) -> None:
         st.rerun()
 
 
-def render_sidebar(settings: Settings, store=None) -> tuple[LLMProvider, str, float]:
+def render_sidebar(
+    settings: Settings, store: Any = None
+) -> tuple[LLMProvider, str, float]:
     with st.sidebar:
         st.header("Settings")
 
