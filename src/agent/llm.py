@@ -39,7 +39,7 @@ def create_llm(
             credentials=settings.gigachat_credentials,
             scope=settings.gigachat_scope,
             model=model_name or _DEFAULT_MODELS["gigachat"],
-            verify_ssl_certs=settings.verify_ssl,
+            verify_ssl_certs=False,
             temperature=temperature,
         )
 

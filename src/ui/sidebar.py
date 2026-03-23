@@ -80,7 +80,7 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
         return check_gigachat(
             creds,
             scope=settings.gigachat_scope,
-            verify_ssl=settings.verify_ssl,
+            verify_ssl=False,
             timeout=timeout,
         )
 
@@ -114,7 +114,7 @@ def _get_provider_models(
         models = list_gigachat_models(
             settings.gigachat_credentials,
             scope=settings.gigachat_scope,
-            verify_ssl=settings.verify_ssl,
+            verify_ssl=False,
             timeout=timeout,
         )
     else:
