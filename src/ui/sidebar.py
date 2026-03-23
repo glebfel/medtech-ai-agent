@@ -3,6 +3,7 @@ from typing import Any
 
 import streamlit as st
 from st_keyup import st_keyup
+from streamlit_js_eval import streamlit_js_eval
 
 from src.agent.health import (
     check_anthropic,
@@ -19,6 +20,22 @@ from src.schemas.enums import LLMProvider
 from src.services.chat_session import ChatSessionService
 from src.settings import Settings, get_settings
 from src.ui.constants import OLLAMA_MODEL_INFO, PROVIDER_MODELS
+
+_COOKIE_MAX_AGE = 365 * 86400
+_COOKIE_PROVIDER = "medassist_provider"
+_COOKIE_MODEL = "medassist_model"
+_COOKIE_TEMPERATURE = "medassist_temperature"
+
+
+def _read_cookie(name: str) -> str | None:
+    return st.context.cookies.get(name)
+
+
+def _set_cookie(name: str, value: str) -> None:
+    streamlit_js_eval(
+        js_expressions=f"document.cookie = '{name}={value}; path=/; max-age={_COOKIE_MAX_AGE}; SameSite=Lax'",
+        key=f"_set_{name}",
+    )
 
 
 _NO_KEY_ERRORS = {"API-ключ не задан", "Client ID / Secret не заданы"}
@@ -284,7 +301,12 @@ def render_sidebar(
         for p in providers:
             statuses[p] = _check_provider(settings, p)
 
-        default_idx = providers.index(settings.default_llm_provider)
+        saved_provider = _read_cookie(_COOKIE_PROVIDER)
+        try:
+            default_idx = providers.index(LLMProvider(saved_provider))
+        except (ValueError, KeyError):
+            default_idx = providers.index(settings.default_llm_provider)
+
         selected_provider = st.selectbox(
             "LLM Provider",
             providers,
@@ -296,15 +318,33 @@ def render_sidebar(
         if not ok:
             st.warning(err)
 
+        saved_model = _read_cookie(_COOKIE_MODEL)
+
         if selected_provider == LLMProvider.OLLAMA and ok:
             model_name = _render_ollama_model_selector(settings.ollama_base_url)
         else:
             models = _get_provider_models(
                 settings, selected_provider=selected_provider, available=ok
             )
-            model_name = st.selectbox("Model", models, index=0) if models else ""
+            if models:
+                model_idx = models.index(saved_model) if saved_model in models else 0
+                model_name = st.selectbox("Model", models, index=model_idx)
+            else:
+                model_name = ""
 
-        temperature = st.slider("Temperature", 0.0, 1.0, 0.1, 0.05)
+        saved_temp = _read_cookie(_COOKIE_TEMPERATURE)
+        try:
+            default_temp = float(saved_temp)
+        except (TypeError, ValueError):
+            default_temp = 0.1
+        temperature = st.slider("Temperature", 0.0, 1.0, default_temp, 0.05)
+
+        if selected_provider.value != saved_provider:
+            _set_cookie(_COOKIE_PROVIDER, selected_provider.value)
+        if model_name != saved_model:
+            _set_cookie(_COOKIE_MODEL, model_name)
+        if str(temperature) != saved_temp:
+            _set_cookie(_COOKIE_TEMPERATURE, str(temperature))
 
         if st.button("New conversation", use_container_width=True):
             st.session_state.messages = []
