@@ -26,6 +26,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
+        set -e
         if [ "${VERIFY_SSL:-true}" = "false" ]; then
           ollama pull ${EMBEDDING_MODEL:-nomic-embed-text} --insecure
         else
