@@ -1,6 +1,5 @@
 import logging
 
-import httpx
 import streamlit as st
 from anthropic import Anthropic
 from gigachat import GigaChat
@@ -11,10 +10,9 @@ logger = logging.getLogger("health")
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def check_openai(api_key: str, timeout: int = 5, verify_ssl: bool = True) -> tuple[bool, str]:
+def check_openai(api_key: str, timeout: int = 5) -> tuple[bool, str]:
     try:
-        http_client = None if verify_ssl else httpx.Client(verify=False)
-        client = OpenAI(api_key=api_key, timeout=timeout, http_client=http_client)
+        client = OpenAI(api_key=api_key, timeout=timeout)
         client.models.list()
         return True, ""
     except Exception as e:
@@ -23,10 +21,9 @@ def check_openai(api_key: str, timeout: int = 5, verify_ssl: bool = True) -> tup
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def check_anthropic(api_key: str, timeout: int = 5, verify_ssl: bool = True) -> tuple[bool, str]:
+def check_anthropic(api_key: str, timeout: int = 5) -> tuple[bool, str]:
     try:
-        http_client = None if verify_ssl else httpx.Client(verify=False)
-        client = Anthropic(api_key=api_key, timeout=timeout, http_client=http_client)
+        client = Anthropic(api_key=api_key, timeout=timeout)
         client.models.list()
         return True, ""
     except Exception as e:
@@ -90,10 +87,9 @@ def list_ollama_models(base_url: str, timeout: int = 5) -> list[dict]:
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def list_openai_models(api_key: str, timeout: int = 5, verify_ssl: bool = True) -> list[str]:
+def list_openai_models(api_key: str, timeout: int = 5) -> list[str]:
     try:
-        http_client = None if verify_ssl else httpx.Client(verify=False)
-        client = OpenAI(api_key=api_key, timeout=timeout, http_client=http_client)
+        client = OpenAI(api_key=api_key, timeout=timeout)
         models = client.models.list()
         excluded = {
             "instruct",
@@ -118,10 +114,9 @@ def list_openai_models(api_key: str, timeout: int = 5, verify_ssl: bool = True) 
 
 
 @st.cache_data(ttl=300, show_spinner=False)
-def list_anthropic_models(api_key: str, timeout: int = 5, verify_ssl: bool = True) -> list[str]:
+def list_anthropic_models(api_key: str, timeout: int = 5) -> list[str]:
     try:
-        http_client = None if verify_ssl else httpx.Client(verify=False)
-        client = Anthropic(api_key=api_key, timeout=timeout, http_client=http_client)
+        client = Anthropic(api_key=api_key, timeout=timeout)
         models = client.models.list(limit=20)
         return [m.id for m in models.data]
     except Exception:

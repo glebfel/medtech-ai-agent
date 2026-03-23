@@ -24,14 +24,19 @@ def _run_migrations(database_url: str) -> None:
     logger.info("Database migrations applied")
 
 
+def _configure_ssl(settings: Settings) -> None:
+    if not settings.verify_ssl:
+        os.environ["REQUESTS_CA_BUNDLE"] = ""
+        os.environ["CURL_CA_BUNDLE"] = ""
+        os.environ["SSL_CERT_FILE"] = ""
+        logger.info("TLS certificate verification disabled (VERIFY_SSL=false)")
+
+
 def _configure_langsmith(settings: Settings) -> None:
     if settings.langchain_tracing_v2 and settings.langchain_api_key.get_secret_value():
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
         os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key.get_secret_value()
         os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
-        if not settings.verify_ssl:
-            os.environ["REQUESTS_CA_BUNDLE"] = ""
-            os.environ["CURL_CA_BUNDLE"] = ""
         logger.info(
             "LangSmith tracing enabled (project=%s)", settings.langchain_project
         )
@@ -42,6 +47,7 @@ def init_infrastructure() -> tuple:
     settings = get_settings()
 
     setup_logging(settings.log_level)
+    _configure_ssl(settings)
     _configure_langsmith(settings)
     _run_migrations(settings.database_url)
 

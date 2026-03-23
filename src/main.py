@@ -4,9 +4,11 @@ import uuid
 import streamlit as st
 
 from src.agent.graph import build_agent
+from src.agent.llm import create_llm
 from src.logging_config import get_logger
 from src.services.chat_session import ChatSessionService
 from src.services.infrastructure import init_infrastructure
+from src.services.memory_extractor import extract_and_save_memory
 from src.ui.chat import process_response, render_chat_history, render_title_editor
 from src.ui.constants import EXAMPLES
 from src.ui.sidebar import render_sidebar
@@ -128,11 +130,19 @@ def main() -> None:
                     )
                 duration = time.monotonic() - start
                 assistant_msg = process_response(result)
+                tools_used = assistant_msg.get("tools_used", [])
                 logger.info(
                     "Agent response: thread_id=%s, duration=%.2fs, tools=%s",
                     thread_id,
                     duration,
-                    assistant_msg.get("tools_used", []),
+                    tools_used,
+                )
+                extract_and_save_memory(
+                    llm=create_llm(active_settings, temperature=0.0, model_name=model_name),
+                    store=store,
+                    user_id=user_id,
+                    message=prompt,
+                    tools_used=tools_used,
                 )
             except Exception:
                 logger.exception(

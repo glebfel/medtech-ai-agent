@@ -1,4 +1,3 @@
-import httpx
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_gigachat import GigaChat
@@ -16,14 +15,12 @@ def create_llm(
     settings: Settings, temperature: float = 0.1, model_name: str = ""
 ) -> BaseChatModel:
     provider = settings.default_llm_provider
-    http_client = None if settings.verify_ssl else httpx.Client(verify=False)
 
     if provider == LLMProvider.OPENAI:
         return ChatOpenAI(
             model=model_name or _DEFAULT_MODELS["openai"],
             api_key=settings.openai_api_key,
             temperature=temperature,
-            http_client=http_client,
         )
 
     if provider == LLMProvider.ANTHROPIC:
@@ -31,7 +28,6 @@ def create_llm(
             model=model_name or _DEFAULT_MODELS["anthropic"],
             api_key=settings.anthropic_api_key,
             temperature=temperature,
-            http_client=http_client,
         )
 
     if provider == LLMProvider.GIGACHAT:

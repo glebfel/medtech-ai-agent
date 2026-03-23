@@ -47,3 +47,18 @@ politely decline and explain your specialization. Do NOT call any tools for non-
 - If uncertain, say so and recommend consulting a specialist.
 - Respond in the same language the user uses (Russian, English, etc.).
 """
+
+MEMORY_EXTRACTION_PROMPT = """\
+Analyze the user message below. If it contains personal medical facts \
+(age, weight, allergies, medications, chronic conditions, diagnoses, symptoms), \
+extract ONLY the facts as a short phrase in the user's language.
+
+If there are NO personal medical facts, respond with exactly: NONE
+
+Examples:
+- "у меня аллергия на кошек" → "Аллергия на кошек"
+- "мне 45 лет, принимаю варфарин" → "Возраст: 45 лет. Принимает варфарин"
+- "что такое тахикардия?" → NONE
+- "проверь взаимодействие аспирина и ибупрофена" → NONE
+
+User message: {message}"""
