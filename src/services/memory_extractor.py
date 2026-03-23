@@ -21,9 +21,9 @@ def extract_and_save_memory(
 
     try:
         response = llm.invoke(MEMORY_EXTRACTION_PROMPT.format(message=message))
-        content = response.content.strip()
+        content = response.content.strip().split("\n")[0].strip()
 
-        if not content or content.upper() == "NONE":
+        if not content or "NONE" in content.upper():
             return
 
         store.put(

@@ -49,16 +49,20 @@ politely decline and explain your specialization. Do NOT call any tools for non-
 """
 
 MEMORY_EXTRACTION_PROMPT = """\
-Analyze the user message below. If it contains personal medical facts \
-(age, weight, allergies, medications, chronic conditions, diagnoses, symptoms), \
-extract ONLY the facts as a short phrase in the user's language.
+Extract personal medical facts from the message. \
+Reply with ONLY a short factual phrase. No explanations, no notes, no reasoning.
 
-If there are NO personal medical facts, respond with exactly: NONE
+Rules:
+- Extract: age, weight, height, allergies, medications, conditions, diagnoses, symptoms
+- Do NOT extract: general medical questions, drug interaction checks, BMI calculation requests
+- Format: short phrase in the user's language, maximum 1 sentence
+- If no personal facts: reply NONE
 
-Examples:
-- "у меня аллергия на кошек" → "Аллергия на кошек"
-- "мне 45 лет, принимаю варфарин" → "Возраст: 45 лет. Принимает варфарин"
-- "что такое тахикардия?" → NONE
-- "проверь взаимодействие аспирина и ибупрофена" → NONE
+"у меня аллергия на кошек" → Аллергия на кошек
+"мне 45 лет, принимаю варфарин" → Возраст: 45 лет. Принимает варфарин
+"рассчитай ИМТ: вес 95 кг, рост 175 см" → Вес: 95 кг, рост: 175 см
+"что такое тахикардия?" → NONE
+"проверь взаимодействие аспирина и ибупрофена" → NONE
 
-User message: {message}"""
+Message: {message}
+Answer:"""
