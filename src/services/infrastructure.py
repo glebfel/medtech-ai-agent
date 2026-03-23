@@ -43,7 +43,7 @@ def _ensure_embedding_model(settings: Settings) -> None:
         models = [m.model.split(":")[0] for m in client.list().models]
         if settings.embedding_model not in models:
             logger.info("Pulling embedding model %s...", settings.embedding_model)
-            client.pull(settings.embedding_model)
+            client.pull(settings.embedding_model, insecure=not settings.ollama_verify_ssl)
             logger.info("Embedding model %s ready", settings.embedding_model)
     except Exception as e:
         logger.warning("Could not ensure embedding model: %s", e)

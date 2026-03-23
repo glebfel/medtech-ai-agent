@@ -40,6 +40,7 @@ class Settings(BaseSettings):
 
     # Ollama
     ollama_base_url: str = "http://localhost:11434"
+    ollama_verify_ssl: bool = True
 
     # Embeddings
     embedding_model: str = "nomic-embed-text"
