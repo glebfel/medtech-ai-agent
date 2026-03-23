@@ -46,7 +46,6 @@ class Settings(BaseSettings):
     # Embeddings
     embedding_model: str = "nomic-embed-text"
     embedding_dim: int = 768
-    embedding_pull_timeout: int = 300
 
     # Health check
     health_check_timeout: int = 5

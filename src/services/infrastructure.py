@@ -6,7 +6,6 @@ from alembic.config import Config
 from dotenv import load_dotenv
 from langgraph.store.postgres import PostgresStore
 from langgraph.store.postgres.base import PostgresIndexConfig
-from ollama import Client as OllamaClient
 
 from src.agent.memory import create_checkpointer
 from src.services.embeddings import get_embeddings
@@ -38,20 +37,6 @@ def _configure_langsmith(settings: Settings) -> None:
         )
 
 
-def _ensure_embedding_model(settings: Settings) -> None:
-    try:
-        client = OllamaClient(
-            host=settings.ollama_base_url, timeout=settings.embedding_pull_timeout
-        )
-        models = [m.model.split(":")[0] for m in client.list().models]
-        if settings.embedding_model not in models:
-            logger.info("Pulling embedding model %s...", settings.embedding_model)
-            client.pull(settings.embedding_model, insecure=not settings.verify_ssl)
-            logger.info("Embedding model %s ready", settings.embedding_model)
-    except Exception as e:
-        logger.warning("Could not ensure embedding model: %s", e)
-
-
 def init_infrastructure() -> tuple:
     load_dotenv()
     settings = get_settings()
@@ -65,7 +50,6 @@ def init_infrastructure() -> tuple:
         pool_size=settings.db_pool_size,
         max_overflow=settings.db_max_overflow,
     )
-    _ensure_embedding_model(settings)
 
     with get_session() as session:
         seed_if_empty(session, data_dir=settings.data_dir)
