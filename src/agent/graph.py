@@ -25,7 +25,7 @@ class _SearchMemoryGigaChatArgs(BaseModel):
 
 
 class _SaveMemoryGigaChatArgs(BaseModel):
-    content: str = Field(default="", description="Memory content to save")
+    content: str = Field(description="Memory content to save")
     action: str = Field(
         default="create", description="Action: create, update, or delete"
     )
