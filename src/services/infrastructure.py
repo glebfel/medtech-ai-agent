@@ -1,6 +1,8 @@
 import os
+import ssl
 
 import psycopg
+import urllib3
 from alembic import command
 from alembic.config import Config
 from dotenv import load_dotenv
@@ -26,9 +28,9 @@ def _run_migrations(database_url: str) -> None:
 
 def _configure_ssl(settings: Settings) -> None:
     if not settings.verify_ssl:
-        os.environ["REQUESTS_CA_BUNDLE"] = ""
+        ssl._create_default_https_context = ssl._create_unverified_context
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         os.environ["CURL_CA_BUNDLE"] = ""
-        os.environ["SSL_CERT_FILE"] = ""
         logger.info("TLS certificate verification disabled (VERIFY_SSL=false)")
 
 
