@@ -68,8 +68,8 @@ streamlit run src/main.py
 |---|---|
 | OpenAI | `OPENAI_API_KEY` |
 | Anthropic | `ANTHROPIC_API_KEY` |
-| GigaChat | `GIGACHAT_CLIENT_ID` + `GIGACHAT_CLIENT_SECRET`, `GIGACHAT_VERIFY_SSL` |
-| Ollama | `OLLAMA_BASE_URL`, `OLLAMA_VERIFY_SSL` (без API-ключей) |
+| GigaChat | `GIGACHAT_CLIENT_ID` + `GIGACHAT_CLIENT_SECRET` |
+| Ollama | `OLLAMA_BASE_URL` (без API-ключей) |
 
 Ollama: скачивание моделей прямо из UI (sidebar → Pull new model).
 

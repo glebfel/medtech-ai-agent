@@ -14,6 +14,9 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    # TLS
+    verify_ssl: bool = True
+
     # LLM
     default_llm_provider: LLMProvider = LLMProvider.OPENAI
 
@@ -27,7 +30,6 @@ class Settings(BaseSettings):
     gigachat_client_id: SecretStr = SecretStr("")
     gigachat_client_secret: SecretStr = SecretStr("")
     gigachat_scope: str = "GIGACHAT_API_PERS"
-    gigachat_verify_ssl: bool = False
 
     @computed_field
     @property
@@ -40,7 +42,6 @@ class Settings(BaseSettings):
 
     # Ollama
     ollama_base_url: str = "http://localhost:11434"
-    ollama_verify_ssl: bool = True
 
     # Embeddings
     embedding_model: str = "nomic-embed-text"
@@ -84,7 +85,6 @@ class Settings(BaseSettings):
     langchain_tracing_v2: bool = False
     langchain_api_key: SecretStr = SecretStr("")
     langchain_project: str = "medassist"
-    langsmith_verify_ssl: bool = True
 
     @computed_field
     @property

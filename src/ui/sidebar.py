@@ -65,13 +65,13 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
         key = settings.openai_api_key.get_secret_value()
         if not key:
             return False, "API-ключ не задан"
-        return check_openai(key, timeout=timeout)
+        return check_openai(key, timeout=timeout, verify_ssl=settings.verify_ssl)
 
     if provider == LLMProvider.ANTHROPIC:
         key = settings.anthropic_api_key.get_secret_value()
         if not key:
             return False, "API-ключ не задан"
-        return check_anthropic(key, timeout=timeout)
+        return check_anthropic(key, timeout=timeout, verify_ssl=settings.verify_ssl)
 
     if provider == LLMProvider.GIGACHAT:
         creds = settings.gigachat_credentials
@@ -80,7 +80,7 @@ def _check_provider(settings: Settings, provider: LLMProvider) -> tuple[bool, st
         return check_gigachat(
             creds,
             scope=settings.gigachat_scope,
-            verify_ssl=settings.gigachat_verify_ssl,
+            verify_ssl=settings.verify_ssl,
             timeout=timeout,
         )
 
@@ -100,17 +100,21 @@ def _get_provider_models(
     timeout = settings.health_check_timeout
     if selected_provider == LLMProvider.OPENAI:
         models = list_openai_models(
-            settings.openai_api_key.get_secret_value(), timeout=timeout
+            settings.openai_api_key.get_secret_value(),
+            timeout=timeout,
+            verify_ssl=settings.verify_ssl,
         )
     elif selected_provider == LLMProvider.ANTHROPIC:
         models = list_anthropic_models(
-            settings.anthropic_api_key.get_secret_value(), timeout=timeout
+            settings.anthropic_api_key.get_secret_value(),
+            timeout=timeout,
+            verify_ssl=settings.verify_ssl,
         )
     elif selected_provider == LLMProvider.GIGACHAT:
         models = list_gigachat_models(
             settings.gigachat_credentials,
             scope=settings.gigachat_scope,
-            verify_ssl=settings.gigachat_verify_ssl,
+            verify_ssl=settings.verify_ssl,
             timeout=timeout,
         )
     else:

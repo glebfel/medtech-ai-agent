@@ -30,7 +30,7 @@ def _configure_langsmith(settings: Settings) -> None:
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
         os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key.get_secret_value()
         os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
-        if not settings.langsmith_verify_ssl:
+        if not settings.verify_ssl:
             os.environ["REQUESTS_CA_BUNDLE"] = ""
             os.environ["CURL_CA_BUNDLE"] = ""
         logger.info(
@@ -46,7 +46,7 @@ def _ensure_embedding_model(settings: Settings) -> None:
         models = [m.model.split(":")[0] for m in client.list().models]
         if settings.embedding_model not in models:
             logger.info("Pulling embedding model %s...", settings.embedding_model)
-            client.pull(settings.embedding_model, insecure=not settings.ollama_verify_ssl)
+            client.pull(settings.embedding_model, insecure=not settings.verify_ssl)
             logger.info("Embedding model %s ready", settings.embedding_model)
     except Exception as e:
         logger.warning("Could not ensure embedding model: %s", e)
