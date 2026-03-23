@@ -4,16 +4,32 @@ from langmem import create_manage_memory_tool, create_search_memory_tool
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.prebuilt import create_react_agent
 from langgraph.store.base import BaseStore
+from pydantic import BaseModel, Field
 
 from src.agent.llm import create_llm
 from src.agent.prompts import SYSTEM_PROMPT
 from src.logging_config import get_logger
+from src.schemas.enums import LLMProvider
 from src.settings import Settings, get_settings
 from src.tools import all_tools
 
 logger = get_logger("agent.graph")
 
 _MEMORY_NAMESPACE = ("user_memory", "{langgraph_user_id}")
+
+
+class _SearchMemoryGigaChatArgs(BaseModel):
+    query: str = Field(description="Search query for patient memories")
+    limit: int = Field(default=10, description="Maximum number of results")
+    offset: int = Field(default=0, description="Result offset")
+
+
+class _SaveMemoryGigaChatArgs(BaseModel):
+    content: str = Field(default="", description="Memory content to save")
+    action: str = Field(
+        default="create", description="Action: create, update, or delete"
+    )
+    id: str = Field(default="", description="Memory ID (required for update/delete)")
 
 
 def _trim_history(state: dict) -> dict:
@@ -62,6 +78,13 @@ def build_agent(
             name="search_memory",
         ),
     ]
+
+    if settings.default_llm_provider == LLMProvider.GIGACHAT:
+        for tool in memory_tools:
+            if tool.name == "search_memory":
+                tool.args_schema = _SearchMemoryGigaChatArgs
+            elif tool.name == "save_memory":
+                tool.args_schema = _SaveMemoryGigaChatArgs
 
     return create_react_agent(
         model=llm,

@@ -84,6 +84,7 @@ class Settings(BaseSettings):
     langchain_tracing_v2: bool = False
     langchain_api_key: SecretStr = SecretStr("")
     langchain_project: str = "medassist"
+    langsmith_verify_ssl: bool = True
 
     @computed_field
     @property

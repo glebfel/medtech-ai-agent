@@ -30,6 +30,9 @@ def _configure_langsmith(settings: Settings) -> None:
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
         os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key.get_secret_value()
         os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
+        if not settings.langsmith_verify_ssl:
+            os.environ["REQUESTS_CA_BUNDLE"] = ""
+            os.environ["CURL_CA_BUNDLE"] = ""
         logger.info(
             "LangSmith tracing enabled (project=%s)", settings.langchain_project
         )
