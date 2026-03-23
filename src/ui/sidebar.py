@@ -156,7 +156,7 @@ def _render_ollama_model_selector(base_url: str) -> str:
                 if m in OLLAMA_MODEL_INFO
                 else m,
             )
-            if st.button("Pull", key="_ollama_pull_btn", use_container_width=True):
+            if st.button("Pull", key="_ollama_pull_btn", width="stretch"):
                 with st.spinner(f"Pulling {selected}..."):
                     success, err = pull_ollama_model(base_url, model_name=selected)
                 if success:
@@ -176,10 +176,10 @@ def _confirm_delete(thread_id: str, title: str) -> None:
     st.markdown(f"This will delete **{title}**.")
     col_cancel, col_delete = st.columns(2)
     with col_cancel:
-        if st.button("Cancel", use_container_width=True):
+        if st.button("Cancel", width="stretch"):
             st.rerun()
     with col_delete:
-        if st.button("Delete", type="primary", use_container_width=True):
+        if st.button("Delete", type="primary", width="stretch"):
             ChatSessionService.delete(thread_id)
             if st.session_state.get("thread_id") == thread_id:
                 st.session_state.thread_id = str(uuid.uuid4())
@@ -192,11 +192,11 @@ def _rename_dialog(thread_id: str, title: str) -> None:
     new_title = st.text_input("New title", value=title)
     col_cancel, col_save = st.columns(2)
     with col_cancel:
-        if st.button("Cancel", use_container_width=True):
+        if st.button("Cancel", width="stretch"):
             st.rerun()
     with col_save:
         if (
-            st.button("Save", type="primary", use_container_width=True)
+            st.button("Save", type="primary", width="stretch")
             and new_title.strip()
         ):
             ChatSessionService.rename(thread_id=thread_id, title=new_title.strip())
@@ -230,20 +230,20 @@ def _render_chat_history_section() -> None:
         tid = s["thread_id"]
         col_title, col_menu = st.columns([5, 1], vertical_alignment="center")
         with col_title:
-            if st.button(s["title"], key=f"sess_{tid}", use_container_width=True):
+            if st.button(s["title"], key=f"sess_{tid}", width="stretch"):
                 st.session_state.thread_id = tid
                 st.session_state.messages = []
                 st.session_state.pop("agent", None)
                 st.session_state._load_from_history = True
                 st.rerun()
         with col_menu:
-            with st.popover("\u22ee", use_container_width=True):
+            with st.popover("\u22ee", width="stretch"):
                 if st.button(
-                    "\u270f\ufe0f Rename", key=f"ren_{tid}", use_container_width=True
+                    "\u270f\ufe0f Rename", key=f"ren_{tid}", width="stretch"
                 ):
                     _rename_dialog(thread_id=tid, title=s["title"])
                 if st.button(
-                    "\U0001f5d1 Delete", key=f"del_{tid}", use_container_width=True
+                    "\U0001f5d1 Delete", key=f"del_{tid}", width="stretch"
                 ):
                     _confirm_delete(thread_id=tid, title=s["title"])
 
@@ -284,7 +284,7 @@ def _render_user_memory_section(store: Any) -> None:
                 store.delete(("user_memory", user_id), key=item.key)
                 st.rerun()
 
-    if st.button("Clear all memory", use_container_width=True):
+    if st.button("Clear all memory", width="stretch"):
         for item in items:
             store.delete(("user_memory", user_id), key=item.key)
         st.rerun()
@@ -346,7 +346,7 @@ def render_sidebar(
         if str(temperature) != saved_temp:
             _set_cookie(_COOKIE_TEMPERATURE, str(temperature))
 
-        if st.button("New conversation", use_container_width=True):
+        if st.button("New conversation", width="stretch"):
             st.session_state.messages = []
             st.session_state.thread_id = str(uuid.uuid4())
             st.session_state.pop("_current_title", None)

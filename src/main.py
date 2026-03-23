@@ -90,7 +90,7 @@ def main() -> None:
         cols = st.columns(2)
         for i, ex in enumerate(EXAMPLES):
             with cols[i % 2]:
-                if st.button(ex, key=f"example_{i}", use_container_width=True):
+                if st.button(ex, key=f"example_{i}", width="stretch"):
                     st.session_state.pending_example = ex
                     st.rerun()
 

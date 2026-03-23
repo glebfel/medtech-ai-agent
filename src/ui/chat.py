@@ -39,7 +39,7 @@ def _render_assistant_message(msg: dict, idx: int = 0) -> None:
     if msg.get("icd10_data"):
         st.dataframe(
             pd.DataFrame(msg["icd10_data"]),
-            use_container_width=True,
+            width="stretch",
             key=f"icd10_history_{idx}",
         )
     if msg.get("tools_used"):
@@ -70,7 +70,7 @@ def process_response(result: dict) -> dict:
             if icd10_data:
                 st.dataframe(
                     pd.DataFrame(icd10_data),
-                    use_container_width=True,
+                    width="stretch",
                     key="icd10_current",
                 )
 
