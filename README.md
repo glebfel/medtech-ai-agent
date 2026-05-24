@@ -1,56 +1,56 @@
-# MedAssistAI — AI-агент клинической поддержки
+# MedAssistAI — Clinical Support AI Agent
 
-LLM-агент для медицинских работников на базе LangGraph, LangChain, Streamlit и PostgreSQL.
+LLM agent for medical professionals built on LangGraph, LangChain, Streamlit, and PostgreSQL.
 
-## Возможности
+## Features
 
-- **8 инструментов:** проверка взаимодействий лекарств, расчёт ИМТ, поиск МКБ-10, расчёт дозировок, словарь мед. терминов, веб-поиск, сохранение/поиск фактов о пациенте
-- **Мульти-LLM:** OpenAI, Anthropic (Claude), GigaChat, Ollama (локальные модели)
-- **Выбор модели в UI:** переключение провайдера и модели в sidebar с индикацией статуса подключения
-- **Семантический поиск:** pgvector + nomic-embed-text для поиска по смыслу в мед. терминах и МКБ-10
-- **Память пользователя:** LangMem + LangGraph Store + pgvector — агент запоминает факты о пациенте и ищет по смыслу
-- **История чатов:** сохранение, поиск, переименование и удаление диалогов
-- **Персистентная память:** состояние диалога хранится в PostgreSQL через LangGraph checkpointer
-- **Веб-интерфейс:** Streamlit с gauge-диаграммой ИМТ, таблицей МКБ-10, управлением памятью
-- **Наблюдаемость:** структурированное логирование, опциональный трейсинг через LangSmith
+- **8 tools:** drug interaction checker, BMI calculator, ICD-10 search, dosage calculator, medical term dictionary, web search, save/search patient facts
+- **Multi-LLM:** OpenAI, Anthropic (Claude), GigaChat, Ollama (local models)
+- **Model selection in UI:** switch provider and model in the sidebar with a connection status indicator
+- **Semantic search:** pgvector + nomic-embed-text for meaning-based search across medical terms and ICD-10
+- **User memory:** LangMem + LangGraph Store + pgvector — the agent remembers patient facts and searches by meaning
+- **Chat history:** save, search, rename, and delete conversations
+- **Persistent memory:** conversation state stored in PostgreSQL via the LangGraph checkpointer
+- **Web interface:** Streamlit with a BMI gauge chart, ICD-10 table, and memory management
+- **Observability:** structured logging, optional tracing via LangSmith
 
-## Архитектура
+## Architecture
 
-> Подробная документация с диаграммами: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+> Detailed documentation with diagrams: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ```
 src/
-├── settings.py          # Конфигурация (pydantic-settings)
-├── main.py              # Точка входа (Streamlit)
-├── schemas/             # Pydantic DTO + enums
-├── models/              # SQLAlchemy ORM-сущности + pgvector
-├── db/                  # Engine, сессии, сидирование + embeddings
-├── repositories/        # Слой доступа к данным (SQL + vector search)
-├── services/            # Бизнес-логика, embeddings, chat sessions
-├── tools/               # LangChain @tool обёртки (6 мед. инструментов)
-├── agent/               # LangGraph агент, LLM factory, LangMem memory, промпты
-└── ui/                  # Streamlit-компоненты (чат, sidebar, графики)
+├── settings.py          # Configuration (pydantic-settings)
+├── main.py              # Entry point (Streamlit)
+├── schemas/             # Pydantic DTOs + enums
+├── models/              # SQLAlchemy ORM entities + pgvector
+├── db/                  # Engine, sessions, seeding + embeddings
+├── repositories/        # Data access layer (SQL + vector search)
+├── services/            # Business logic, embeddings, chat sessions
+├── tools/               # LangChain @tool wrappers (6 medical tools)
+├── agent/               # LangGraph agent, LLM factory, LangMem memory, prompts
+└── ui/                  # Streamlit components (chat, sidebar, charts)
 ```
 
-## Быстрый старт
+## Quick start
 
-### Docker (рекомендуется)
+### Docker (recommended)
 
 ```bash
 cp .env.example .env
-# заполнить ключи LLM в .env
+# fill in LLM keys in .env
 docker compose up --build
 ```
 
-Открыть http://localhost:8501
+Open http://localhost:8501
 
-### Скрипт быстрого запуска
+### Quick start script
 
 ```bash
 ./scripts/start.sh
 ```
 
-### Ручной запуск
+### Manual start
 
 ```bash
 docker compose up -d postgres ollama
@@ -60,43 +60,43 @@ cp .env.example .env
 streamlit run src/main.py
 ```
 
-## Подключение LLM-провайдеров
+## LLM provider setup
 
-Указать ключи в `.env`. Провайдер переключается через UI в любой момент.
+Set the keys in `.env`. You can switch the provider in the UI at any time.
 
-| Провайдер | Переменные |
+| Provider | Variables |
 |---|---|
 | OpenAI | `OPENAI_API_KEY` |
 | Anthropic | `ANTHROPIC_API_KEY` |
 | GigaChat | `GIGACHAT_CLIENT_ID` + `GIGACHAT_CLIENT_SECRET` |
-| Ollama | `OLLAMA_BASE_URL` (без API-ключей) |
+| Ollama | `OLLAMA_BASE_URL` (no API keys required) |
 
-Ollama: скачивание моделей прямо из UI (sidebar → Pull new model).
+Ollama: download models directly from the UI (sidebar → Pull new model).
 
-## Конфигурация
+## Configuration
 
-Полный справочник переменных окружения: [docs/ARCHITECTURE.md#справочник-конфигурации](docs/ARCHITECTURE.md#справочник-конфигурации)
+Full environment variables reference: [docs/ARCHITECTURE.md#configuration-reference](docs/ARCHITECTURE.md#configuration-reference)
 
-## Демо-сценарии
+## Demo scenarios
 
-| Запрос | Инструмент |
+| Request | Tool |
 |---|---|
-| Можно ли принимать варфарин с аспирином? | drug_interaction_checker |
-| Рассчитай ИМТ: вес 95 кг, рост 175 см | bmi_calculator + gauge-диаграмма |
-| Код МКБ-10 для диабета 2 типа | icd10_search (pgvector) |
-| Дозировка амоксициллина для ребёнка 30 кг, 8 лет | dosage_calculator |
-| Что такое тахикардия? / учащённое сердцебиение | medical_term_explainer (pgvector) |
-| Последние рекомендации по лечению гипертонии | search_medical_literature |
-| Мне 45 лет, принимаю варфарин | save_memory (LangMem) |
-| Какие у меня аллергии? | search_memory (LangMem) |
+| Can warfarin be taken with aspirin? | drug_interaction_checker |
+| Calculate BMI: weight 95 kg, height 175 cm | bmi_calculator + gauge chart |
+| ICD-10 code for type 2 diabetes | icd10_search (pgvector) |
+| Amoxicillin dosage for a child weighing 30 kg, age 8 | dosage_calculator |
+| What is tachycardia? / rapid heartbeat | medical_term_explainer (pgvector) |
+| Latest recommendations for treating hypertension | search_medical_literature |
+| I'm 45 years old, taking warfarin | save_memory (LangMem) |
+| What allergies do I have? | search_memory (LangMem) |
 
-## Стек технологий
+## Technology stack
 
-- **Агент:** LangGraph (ReAct), LangChain, LangMem
+- **Agent:** LangGraph (ReAct), LangChain, LangMem
 - **LLM:** OpenAI / Anthropic / GigaChat / Ollama
-- **Память:** LangGraph Store + LangMem (user memory), PostgreSQL Checkpointer
-- **Поиск:** pgvector + nomic-embed-text (семантический), DuckDuckGo (веб)
+- **Memory:** LangGraph Store + LangMem (user memory), PostgreSQL Checkpointer
+- **Search:** pgvector + nomic-embed-text (semantic), DuckDuckGo (web)
 - **UI:** Streamlit + Plotly
-- **БД:** PostgreSQL 16 + pgvector + SQLAlchemy 2.0 + Alembic
-- **Наблюдаемость:** LangSmith, Python logging
-- **Инфраструктура:** Docker Compose, Ollama, Ruff + pre-commit
+- **Database:** PostgreSQL 16 + pgvector + SQLAlchemy 2.0 + Alembic
+- **Observability:** LangSmith, Python logging
+- **Infrastructure:** Docker Compose, Ollama, Ruff + pre-commit
